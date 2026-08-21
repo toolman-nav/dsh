@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ public class GitHubCrawler {
     private final String topic;
     private final int maxPages;
     private final int readmeLimit;
+    private final int staleDays;
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public GitHubCrawler(
@@ -50,7 +52,8 @@ public class GitHubCrawler {
             CrawlMetaRepository crawlMetaRepository,
             @Value("${bay.github.topic}") String topic,
             @Value("${bay.github.max-pages}") int maxPages,
-            @Value("${bay.crawl.readme-limit:60}") int readmeLimit
+            @Value("${bay.crawl.readme-limit:60}") int readmeLimit,
+            @Value("${bay.crawl.stale-days:7}") int staleDays
     ) {
         this.gitHubClient = gitHubClient;
         this.awesomeRegistryClient = awesomeRegistryClient;
@@ -59,6 +62,7 @@ public class GitHubCrawler {
         this.topic = topic;
         this.maxPages = maxPages;
         this.readmeLimit = Math.max(0, readmeLimit);
+        this.staleDays = Math.max(1, staleDays);
     }
 
     @Scheduled(cron = "${bay.crawl.cron}")
@@ -77,9 +81,11 @@ public class GitHubCrawler {
         try {
             try {
                 saved += ingestRegistry(now);
+                dropStaleRegistryRows(now);
                 try {
                     saved += ingestGitHubTopic(now);
                 } catch (Exception ex) {
+                    error = "GitHub topic crawl failed: " + ex.getMessage();
                     log.warn("GitHub topic crawl failed after registry ingest: {}", ex.getMessage());
                 }
                 pluginRepository.findById("deepseek-ai/deepseek-harness").ifPresent(pluginRepository::delete);
@@ -113,6 +119,7 @@ public class GitHubCrawler {
                 pluginRepository.delete(plugin);
                 continue;
             }
+            plugin.setCapability(PluginClassifier.normalizeCapability(plugin.getCapability()));
             applyClassification(plugin);
             pluginRepository.save(plugin);
         }
@@ -121,8 +128,7 @@ public class GitHubCrawler {
     private int ingestRegistry(Instant now) {
         AwesomeCatalog catalog = awesomeRegistryClient.fetch();
         if (catalog == null || catalog.plugins() == null || catalog.plugins().isEmpty()) {
-            log.warn("Awesome registry returned no plugins");
-            return 0;
+            throw new IllegalStateException("Awesome registry returned no plugins");
         }
         int saved = 0;
         for (AwesomePlugin entry : catalog.plugins()) {
@@ -141,6 +147,7 @@ public class GitHubCrawler {
             plugin.setHtmlUrl(entry.url());
             plugin.setGithubFullName(githubFullName);
             plugin.setRegistryListed(true);
+            plugin.setRegistryLastSeenAt(now);
             if (entry.install() != null && !entry.install().isBlank()) {
                 plugin.setInstallLine(entry.install().trim());
             }
@@ -280,6 +287,26 @@ public class GitHubCrawler {
             if (registryRepos.contains(plugin.getGithubFullName().toLowerCase(Locale.ROOT))) {
                 pluginRepository.delete(plugin);
             }
+        }
+    }
+
+    private void dropStaleRegistryRows(Instant now) {
+        Instant cutoff = now.minus(staleDays, ChronoUnit.DAYS);
+        int deleted = 0;
+        for (Plugin plugin : pluginRepository.findAll()) {
+            Instant lastSeen = plugin.getRegistryLastSeenAt();
+            if (lastSeen == null) {
+                lastSeen = plugin.getCrawledAt() != null ? plugin.getCrawledAt() : now;
+                plugin.setRegistryLastSeenAt(lastSeen);
+                pluginRepository.save(plugin);
+            }
+            if (plugin.isRegistryListed() && lastSeen != null && lastSeen.isBefore(cutoff)) {
+                pluginRepository.delete(plugin);
+                deleted++;
+            }
+        }
+        if (deleted > 0) {
+            log.info("Removed {} registry plugins not seen for {} days", deleted, staleDays);
         }
     }
 

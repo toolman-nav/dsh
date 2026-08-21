@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "vite",
     "export-catalog": "node scripts/export-catalog.mjs",
-    "build": "vite build",
+    "build": "vite build && node scripts/prerender-seo.mjs",
+    "prerender": "node scripts/prerender-seo.mjs",
+    "verify:seo": "node scripts/verify-seo.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

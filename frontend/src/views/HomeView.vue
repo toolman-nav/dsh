@@ -32,7 +32,7 @@ onMounted(async () => {
     home.value = await fetchHome();
     emit("crawled", formatDate(home.value.lastCrawledAt));
   } catch {
-    error.value = t("首页数据加载失败。确认后端已启动后刷新。", "Home data failed to load. Refresh after the backend is running.");
+    error.value = t("首页数据加载失败，请刷新后重试。", "Home data failed to load. Refresh and try again.");
   } finally {
     loading.value = false;
   }
@@ -66,13 +66,13 @@ function search() {
         {{ t(`已收录 ${home.total} 个插件`, `${home.total} plugins indexed`) }}
       </p>
       <div class="chips">
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '开发运行时' } }">{{ t("开发", "Dev") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '开发运行时' } }">{{ t("开发运行时", "Dev runtime") }}</RouterLink>
         <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '浏览器 / Web' } }">{{ t("浏览器 / Web", "Browser / Web") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { q: '搜索' } }">{{ t("搜索", "Search") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '主题外观' } }">{{ t("UI 主题", "UI themes") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '视觉与多模态' } }">{{ t("视觉", "Vision") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '界面增强' } }">{{ t("设计", "Design") }}</RouterLink>
-        <RouterLink class="chip" to="/plugins">{{ t("全部插件 →", "All plugins →") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '工具与能力' } }">{{ t("工具与能力", "Tools") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '主题外观' } }">{{ t("主题外观", "Themes") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '视觉与多模态' } }">{{ t("视觉与多模态", "Vision") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '界面增强' } }">{{ t("界面增强", "UI enhancements") }}</RouterLink>
+        <RouterLink class="chip" to="/plugins/">{{ t("全部插件 →", "All plugins →") }}</RouterLink>
       </div>
     </section>
 

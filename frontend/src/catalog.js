@@ -1,57 +1,43 @@
-const CATALOG_URL = `${String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/")}catalog.json`;
+const BASE_URL = String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/");
+const DATA_URL = `${BASE_URL}data/`;
 
-let catalogPromise;
+let indexPromise;
+let metaPromise;
+let homePromise;
+
+async function loadJson(path) {
+  const response = await fetch(`${DATA_URL}${path}`);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  return response.json();
+}
+
+function loadIndex() {
+  if (!indexPromise) {
+    indexPromise = loadJson("catalog-index.json").then((data) => ({
+      plugins: Array.isArray(data.plugins) ? data.plugins : [],
+    }));
+  }
+  return indexPromise;
+}
 
 function compareIso(a, b) {
   return String(b || "").localeCompare(String(a || ""));
 }
 
-function loadCatalog() {
-  if (!catalogPromise) {
-    catalogPromise = fetch(CATALOG_URL).then(async (res) => {
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      return {
-        lastCrawledAt: data.lastCrawledAt || "",
-        plugins: Array.isArray(data.plugins) ? data.plugins : [],
-      };
-    });
-  }
-  return catalogPromise;
-}
-
 function matches(plugin, { q, capability, kind, featured, includeAll }) {
-  if (!includeAll && !plugin.pluginLike) {
-    return false;
-  }
-  if (featured && !plugin.featured) {
-    return false;
-  }
-  if (capability && plugin.capability !== capability) {
-    return false;
-  }
-  if (kind && plugin.kind !== kind) {
-    return false;
-  }
+  if (!includeAll && !plugin.pluginLike) return false;
+  if (featured && !plugin.featured) return false;
+  if (capability && plugin.capability !== capability) return false;
+  if (kind && plugin.kind !== kind) return false;
   const query = String(q || "").trim().toLowerCase();
-  if (!query) {
-    return true;
-  }
-  const hay = [
-    plugin.id,
-    plugin.owner,
-    plugin.name,
-    plugin.description,
-    plugin.topics,
-    plugin.capability,
-    plugin.kind,
-  ]
+  if (!query) return true;
+  return [plugin.id, plugin.owner, plugin.name, plugin.description, plugin.topics, plugin.capability, plugin.kind]
     .filter(Boolean)
     .join(" ")
-    .toLowerCase();
-  return hay.includes(query);
+    .toLowerCase()
+    .includes(query);
 }
 
 function sortPlugins(plugins, sort) {
@@ -66,33 +52,14 @@ function sortPlugins(plugins, sort) {
   return copy;
 }
 
-export async function catalogMeta() {
-  const { lastCrawledAt, plugins } = await loadCatalog();
-  return {
-    lastCrawledAt,
-    total: plugins.filter((p) => p.pluginLike).length,
-    topicTotal: plugins.length,
-  };
+export function catalogMeta() {
+  if (!metaPromise) metaPromise = loadJson("meta.json");
+  return metaPromise;
 }
 
-export async function catalogHome() {
-  const { lastCrawledAt, plugins } = await loadCatalog();
-  const liked = plugins.filter((p) => p.pluginLike);
-  let featured = sortPlugins(
-    plugins.filter((p) => p.featured),
-    "stars"
-  ).slice(0, 6);
-  if (!featured.length) {
-    featured = sortPlugins(liked, "stars").slice(0, 6);
-  }
-  return {
-    lastCrawledAt,
-    total: liked.length,
-    topicTotal: plugins.length,
-    featured,
-    newest: sortPlugins(liked, "updated").slice(0, 6),
-    popular: sortPlugins(liked, "stars").slice(0, 6),
-  };
+export function catalogHome() {
+  if (!homePromise) homePromise = loadJson("home.json");
+  return homePromise;
 }
 
 export async function catalogSearch({
@@ -105,26 +72,30 @@ export async function catalogSearch({
   page = 0,
   size = 24,
 } = {}) {
-  const { plugins } = await loadCatalog();
+  const { plugins } = await loadIndex();
   const matched = sortPlugins(
-    plugins.filter((p) => matches(p, { q, capability, kind, featured, includeAll })),
+    plugins.filter((plugin) => matches(plugin, { q, capability, kind, featured, includeAll })),
     sort
   );
-  const start = Math.max(0, page) * size;
-  const content = matched.slice(start, start + size);
-  const totalElements = matched.length;
-  const last = start + content.length >= totalElements;
+  const safePage = Math.max(0, Number(page) || 0);
+  const safeSize = Math.max(1, Number(size) || 24);
+  const start = safePage * safeSize;
+  const content = matched.slice(start, start + safeSize);
   return {
     content,
-    totalElements,
-    number: page,
-    size,
-    last,
+    totalElements: matched.length,
+    number: safePage,
+    size: safeSize,
+    last: start + content.length >= matched.length,
   };
 }
 
 export async function catalogDetail(owner, name) {
-  const id = `${decodeURIComponent(owner)}/${decodeURIComponent(name)}`;
-  const { plugins } = await loadCatalog();
-  return plugins.find((p) => p.id === id) || null;
+  const path = `plugins/${encodeURIComponent(String(owner || ""))}/${encodeURIComponent(String(name || ""))}.json`;
+  try {
+    return await loadJson(path);
+  } catch (error) {
+    if (String(error?.message).includes("HTTP 404")) return null;
+    throw error;
+  }
 }

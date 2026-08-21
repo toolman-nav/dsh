@@ -1,13 +1,19 @@
 package market.bay.plugin;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Map;
 
 @RestController
@@ -15,9 +21,11 @@ import java.util.Map;
 public class PluginController {
 
     private final PluginService pluginService;
+    private final String adminToken;
 
-    public PluginController(PluginService pluginService) {
+    public PluginController(PluginService pluginService, @Value("${bay.admin.token:}") String adminToken) {
         this.pluginService = pluginService;
+        this.adminToken = adminToken;
     }
 
     @GetMapping("/health")
@@ -56,7 +64,10 @@ public class PluginController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size
     ) {
-        return pluginService.search(q, capability, kind, featured, includeAll, sort, page, Math.min(size, 60));
+        return pluginService.search(
+                q, capability, kind, featured, includeAll, sort,
+                Math.max(0, page), Math.max(1, Math.min(size, 60))
+        );
     }
 
     @GetMapping("/plugins/{owner}/{name}")
@@ -65,7 +76,17 @@ public class PluginController {
     }
 
     @PostMapping("/admin/crawl")
-    public Map<String, Object> crawl() {
+    public Map<String, Object> crawl(
+            @RequestHeader(value = "X-Bay-Admin-Token", required = false) String suppliedToken
+    ) {
+        if (adminToken == null || adminToken.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "admin crawl is disabled");
+        }
+        byte[] expected = adminToken.getBytes(StandardCharsets.UTF_8);
+        byte[] supplied = String.valueOf(suppliedToken).getBytes(StandardCharsets.UTF_8);
+        if (!MessageDigest.isEqual(expected, supplied)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "invalid admin token");
+        }
         return Map.of("saved", pluginService.crawlNow());
     }
 }

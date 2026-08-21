@@ -71,8 +71,8 @@ function goSearch(q) {
       </RouterLink>
       <nav class="nav" aria-label="主导航">
         <RouterLink to="/" :aria-current="current('home')">{{ t("首页", "Home") }}</RouterLink>
-        <RouterLink to="/plugins" :aria-current="current('plugins') || current('plugin')">{{ t("插件", "Plugins") }}</RouterLink>
-        <RouterLink to="/about" :aria-current="current('about')">{{ t("关于", "About") }}</RouterLink>
+        <RouterLink to="/plugins/" :aria-current="current('plugins') || current('plugin')">{{ t("插件", "Plugins") }}</RouterLink>
+        <RouterLink to="/about/" :aria-current="current('about')">{{ t("关于", "About") }}</RouterLink>
       </nav>
       <div class="header-tools">
         <button class="icon-btn" type="button" :title="t('搜索', 'Search')" @click="ui.paletteOpen = true">
@@ -82,7 +82,7 @@ function goSearch(q) {
           class="icon-btn"
           type="button"
           :aria-pressed="ui.theme === 'dark'"
-          :title="t('暗色', 'Dark')"
+          :title="t('切换深色模式', 'Toggle dark mode')"
           @click="toggleTheme"
         >
           ◐
@@ -95,8 +95,8 @@ function goSearch(q) {
   </header>
   <nav class="mobile-nav" aria-label="移动导航">
     <RouterLink to="/" :aria-current="current('home')">{{ t("首页", "Home") }}</RouterLink>
-    <RouterLink to="/plugins" :aria-current="current('plugins') || current('plugin')">{{ t("插件", "Plugins") }}</RouterLink>
-    <RouterLink to="/about" :aria-current="current('about')">{{ t("关于", "About") }}</RouterLink>
+    <RouterLink to="/plugins/" :aria-current="current('plugins') || current('plugin')">{{ t("插件", "Plugins") }}</RouterLink>
+    <RouterLink to="/about/" :aria-current="current('about')">{{ t("关于", "About") }}</RouterLink>
   </nav>
 
   <RouterView @crawled="(v) => (lastCrawledAt = v)" />
@@ -115,14 +115,14 @@ function goSearch(q) {
         <p class="crawl" v-if="lastCrawledAt">{{ t("目录更新于", "Catalog updated") }} {{ lastCrawledAt }}</p>
       </div>
       <nav class="footer-links">
-        <RouterLink to="/about">{{ t("关于", "About") }}</RouterLink>
+        <RouterLink to="/about/">{{ t("关于", "About") }}</RouterLink>
         <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noreferrer">DeepSeek Harness</a>
       </nav>
     </div>
   </footer>
 
   <div class="overlay" :class="{ 'is-open': ui.paletteOpen }" @click.self="closePalette">
-    <div class="palette" role="dialog">
+    <div class="palette" role="dialog" aria-modal="true" :aria-label="t('搜索插件', 'Search plugins')">
       <input
         v-model="paletteQuery"
         type="search"

@@ -3,6 +3,7 @@ import { computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import { fetchPlugin, hydrateReadme } from "../api.js";
 import { renderReadme } from "../readme.js";
+import { pluginJsonLd, setSeo } from "../seo.js";
 import { copyText, formatDate, formatStars, pickReadme, pluginFullLabel, plainText, t, ui } from "../ui.js";
 
 const route = useRoute();
@@ -40,6 +41,12 @@ async function onReadmeClick(event) {
 async function load() {
   error.value = "";
   tab.value = "readme";
+  setSeo({
+    title: t("插件加载中｜Bay", "Loading plugin | Bay"),
+    description: t("正在加载 DSH 插件信息。", "Loading DSH plugin information."),
+    path: route.path,
+    robots: "noindex,follow",
+  });
   try {
     plugin.value = await fetchPlugin(route.params.owner, route.params.name);
     hydrateReadme(plugin.value, ui.lang !== "en").then((next) => {
@@ -55,9 +62,23 @@ async function load() {
 
 watch(() => [route.params.owner, route.params.name], load, { immediate: true });
 watch(
-  () => plugin.value,
+  () => [plugin.value, ui.lang],
   (p) => {
-    document.title = p?.id ? `${p.id} · Bay` : t("插件 · Bay", "Plugin · Bay");
+    const item = p[0];
+    if (!item?.id) return;
+    const description = plainText(item.description) || t(
+      `${pluginFullLabel(item)} 是一个 DeepSeek Harness 社区插件，查看安装命令、源码与更新时间。`,
+      `${pluginFullLabel(item)} is a community plugin for DeepSeek Harness. View its install command, source, and update date.`
+    );
+    const path = `/plugins/${encodeURIComponent(item.owner)}/${encodeURIComponent(item.id.slice(item.id.indexOf("/") + 1))}/`;
+    setSeo({
+      title: `${pluginFullLabel(item)}｜DSH 插件｜Bay`,
+      description: description.slice(0, 160),
+      path,
+      robots: item.pluginLike ? undefined : "noindex,follow",
+      type: "article",
+      jsonLd: pluginJsonLd(item, path, description),
+    });
   }
 );
 

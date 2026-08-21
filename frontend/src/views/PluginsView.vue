@@ -2,31 +2,11 @@
 import { reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { fetchPlugins } from "../api.js";
+import { CAPABILITIES } from "../taxonomy.js";
 import { t } from "../ui.js";
 import PluginCard from "../components/PluginCard.vue";
 
-const CAPS = [
-  "界面增强",
-  "工具与能力",
-  "开发运行时",
-  "会话与消息",
-  "工作流",
-  "用量与计费",
-  "记忆",
-  "通知与集成",
-  "主题外观",
-  "视觉与多模态",
-  "娱乐",
-  "Skills",
-  "安全与权限",
-  "插件市场",
-  "模型与供应商",
-  "Git / GitHub",
-  "浏览器 / Web",
-  "远程与移动",
-  "语音",
-  "文档与渲染",
-];
+const CAPS = CAPABILITIES;
 const KINDS = ["工具", "服务", "客户端 UI", "工作流", "主题"];
 
 const route = useRoute();
@@ -99,7 +79,7 @@ async function load(reset = true) {
     page.number = data.number ?? nextPage;
     page.last = Boolean(data.last);
   } catch {
-    error.value = t("后端还没连上。先启动 Spring Boot。", "Backend is offline. Start Spring Boot first.");
+    error.value = t("插件数据加载失败，请刷新后重试。", "Plugin data failed to load. Refresh and try again.");
     if (reset) {
       page.content = [];
       page.totalElements = 0;

@@ -38,6 +38,7 @@ public class Plugin {
     private boolean pluginLike;
     private boolean featured;
     private Boolean registryListed;
+    private Instant registryLastSeenAt;
     private String githubFullName;
 
     @Column(length = 400)
@@ -204,6 +205,14 @@ public class Plugin {
 
     public void setRegistryListed(boolean registryListed) {
         this.registryListed = registryListed;
+    }
+
+    public Instant getRegistryLastSeenAt() {
+        return registryLastSeenAt;
+    }
+
+    public void setRegistryLastSeenAt(Instant registryLastSeenAt) {
+        this.registryLastSeenAt = registryLastSeenAt;
     }
 
     public String getGithubFullName() {

@@ -4,17 +4,21 @@ server:
 spring:
   datasource:
     url: jdbc:h2:file:./data/bay;MODE=PostgreSQL;AUTO_SERVER=TRUE
-    username: sa
-    password:
+    username: ${BAY_DB_USERNAME:sa}
+    password: ${BAY_DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: update
     open-in-view: false
   h2:
     console:
-      enabled: ${BAY_H2_CONSOLE:true}
+      enabled: ${BAY_H2_CONSOLE:false}
 
 bay:
+  admin:
+    token: ${BAY_ADMIN_TOKEN:}
+  cors:
+    allowed-origins: ${BAY_ALLOWED_ORIGINS:https://dshpluginlist.com}
   github:
     token: ${GITHUB_TOKEN:}
     topic: dsh-plugin
@@ -24,6 +28,7 @@ bay:
   crawl:
     cron: "0 0 * * * *"
     readme-limit: ${BAY_README_LIMIT:60}
+    stale-days: ${BAY_STALE_DAYS:7}
 
 logging:
   level:

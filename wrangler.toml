@@ -1,8 +1,8 @@
 name = "dsh"
-compatibility_date = "2024-11-11"
+compatibility_date = "2026-08-21"
 
-# Cloudflare Git 实际跑的是 `npx wrangler deploy`（不是 pages deploy）。
-# pages_build_output_dir 只给 `wrangler pages deploy` 用，会被忽略并报 Missing entry-point。
+# Publish the Vite build plus SEO/GEO prerender output, not the legacy design snapshot.
 [assets]
-directory = "./design"
-not_found_handling = "single-page-application"
+directory = "./frontend/dist"
+not_found_handling = "404-page"
+html_handling = "auto-trailing-slash"

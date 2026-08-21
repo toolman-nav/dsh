@@ -70,7 +70,7 @@ export function pluginHref(plugin) {
   const slash = id.indexOf("/");
   const owner = slash < 0 ? id : id.slice(0, slash);
   const rest = slash < 0 ? "" : id.slice(slash + 1);
-  return `/plugins/${encodeURIComponent(owner)}/${encodeURIComponent(rest)}`;
+  return `/plugins/${encodeURIComponent(owner)}/${encodeURIComponent(rest)}/`;
 }
 
 export function pluginTitle(plugin) {

@@ -1,14 +1,14 @@
-# Bay · DSH 插件仓（Pages 发布目录）
+# Bay · DSH 插件仓（历史原型目录）
 
-线上 https://dshpluginlist.com/ 当前从这个目录发布。内容是 Vue 生产构建（含 `catalog.json`），与本地 `http://127.0.0.1:5173/` 同一套应用。
+此目录只保留历史原型和视觉对照，不再作为 https://dshpluginlist.com/ 的发布源。
 
 静态高保真原型已移到 `mock/`，仅作视觉对照，不再对外提供。
 
-更新发布包：
+生产发布包由 `frontend` 构建：
 
 ```bash
 cd frontend
 npm run export-catalog   # 需本地后端
 npm run build
-rsync -a --delete --exclude mock --exclude README.md dist/ ../design/
+npm run verify:seo
 ```

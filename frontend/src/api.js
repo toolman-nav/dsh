@@ -1,4 +1,5 @@
 import { catalogDetail, catalogHome, catalogMeta, catalogSearch } from "./catalog.js";
+import { normalizePlugin } from "./taxonomy.js";
 
 const API = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
 const useStatic = !API && (import.meta.env.PROD || import.meta.env.VITE_STATIC === "1");
@@ -11,17 +12,37 @@ async function getJson(path) {
   return res.json();
 }
 
-export function fetchHome() {
-  return useStatic ? catalogHome() : getJson("/api/home");
+function normalizePlugins(items) {
+  return Array.isArray(items) ? items.map(normalizePlugin) : [];
+}
+
+function normalizeHome(data) {
+  return {
+    ...data,
+    featured: normalizePlugins(data?.featured),
+    newest: normalizePlugins(data?.newest),
+    popular: normalizePlugins(data?.popular),
+  };
+}
+
+function normalizePage(data) {
+  return {
+    ...data,
+    content: normalizePlugins(data?.content),
+  };
+}
+
+export async function fetchHome() {
+  return normalizeHome(await (useStatic ? catalogHome() : getJson("/api/home")));
 }
 
 export function fetchMeta() {
   return useStatic ? catalogMeta() : getJson("/api/meta");
 }
 
-export function fetchPlugins({ q = "", capability = "", kind = "", featured = false, includeAll = false, sort = "updated", page = 0, size = 24 } = {}) {
+export async function fetchPlugins({ q = "", capability = "", kind = "", featured = false, includeAll = false, sort = "updated", page = 0, size = 24 } = {}) {
   if (useStatic) {
-    return catalogSearch({ q, capability, kind, featured, includeAll, sort, page, size });
+    return normalizePage(await catalogSearch({ q, capability, kind, featured, includeAll, sort, page, size }));
   }
   const params = new URLSearchParams({
     q,
@@ -33,7 +54,7 @@ export function fetchPlugins({ q = "", capability = "", kind = "", featured = fa
     page: String(page),
     size: String(size),
   });
-  return getJson(`/api/plugins?${params}`);
+  return normalizePage(await getJson(`/api/plugins?${params}`));
 }
 
 export async function fetchPlugin(owner, name) {
@@ -42,9 +63,9 @@ export async function fetchPlugin(owner, name) {
     if (!plugin) {
       throw new Error("HTTP 404");
     }
-    return plugin;
+    return normalizePlugin(plugin);
   }
-  return getJson(`/api/plugins/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`);
+  return normalizePlugin(await getJson(`/api/plugins/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`));
 }
 
 function githubRepo(plugin) {
