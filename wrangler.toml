@@ -1,2 +1,3 @@
 name = "dshpluginlist"
-pages_build_output_dir = "frontend/dist"
+# dist 不进 git；Git 同步到 Pages 时发布已构建的 design/（与本地 5173 同一套 Vue 包）
+pages_build_output_dir = "design"

@@ -29,36 +29,34 @@ npm run dev
 
 前端开发时把 `/api` 代理到 `http://127.0.0.1:8080`。
 
-## 静态站（先上 Cloudflare Pages）
+## 静态站（GitHub → Cloudflare Pages）
 
-后台可以后上。先用本地已抓到的数据导出快照，再构建纯静态包：
+流程：本地改好 → `git push` → Pages 跟 `main` 同步。`frontend/dist` 不进 git，发布目录是已构建的 `design/`（与本地 5173 同一套 Vue 包）。
 
 ```bash
-# 需本地后端已启动
+# 有新目录数据时（需本地后端）
 cd frontend
 npm run export-catalog
 npm run build
+rsync -a --delete --exclude mock --exclude README.md dist/ ../design/
+cd ..
+git add design frontend/public/catalog.json
+git commit -m "Update static catalog snapshot"
+git push origin main
 ```
 
-产物在 `frontend/dist/`。Pages 设置：
+Pages 项目请这样接仓库 https://github.com/toolman-nav/dsh ：
 
-- 项目目录：`frontend`（若用 Git 集成；Direct Upload 则直接上传 `dist`）
-- 构建命令：`npm run build`（需仓库里已有 `public/catalog.json`）
-- 输出目录：`dist`
-- **不要**设置 `VITE_API_BASE`，生产包会读 `/catalog.json`
+- Production branch：`main`
+- 构建命令：留空
+- 输出目录：`design`
+- **不要**填 `VITE_API_BASE`
 
-`public/_redirects` 已把 SPA 路由回退到 `index.html`。详情页 README 会按需从 jsDelivr / GitHub raw 拉，不经过 Java。
+`design/_redirects` 已把 SPA 路由回退到 `index.html`。详情 README 按需从 jsDelivr / GitHub raw 拉。
 
-本地预览生产包：
+本地开发仍用 `frontend` + Vite：http://127.0.0.1:5173/
 
-```bash
-cd frontend
-npm run preview
-```
-
-数据更新：本地跑完爬虫后再执行 `npm run export-catalog`，重新 build / 上传。
-
-后台上线后，Pages 环境变量设 `VITE_API_BASE=https://your-bay-api.example.com` 并重新构建，即切回实时 API。生产后端可关 H2 控制台：`BAY_H2_CONSOLE=false`。健康检查：`GET /api/health`。
+后台上线后，再改为构建 `frontend` 并设置 `VITE_API_BASE`。生产后端可关 H2 控制台：`BAY_H2_CONSOLE=false`。健康检查：`GET /api/health`。
 
 ## 抓取
 
