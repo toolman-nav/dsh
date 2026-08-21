@@ -1,6 +1,4 @@
+# 必须和 Cloudflare 项目名一致（GitHub 检查：Workers Builds: dsh）
 name = "dsh"
 compatibility_date = "2024-11-11"
-
-[assets]
-directory = "./design"
-not_found_handling = "single-page-application"
+pages_build_output_dir = "design"
