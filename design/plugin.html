@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>bowenliang123/dsh-context · Bay</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到内容</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-slot" aria-hidden="true"><img src="logo.png" alt="" width="36" height="36" /></span>
+          <span class="brand-type">
+            <strong>Bay</strong>
+            <small>DSH 插件仓</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href="index.html" data-i18n="home">首页</a>
+          <a href="plugins.html" aria-current="page" data-i18n="plugins">插件</a>
+          <a href="about.html" data-i18n="about">关于</a>
+        </nav>
+        <div class="header-tools">
+          <button class="icon-btn" type="button" data-open-search title="搜索">⌕</button>
+          <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false" title="暗色">◐</button>
+          <button class="icon-btn lang-btn" type="button" data-lang-toggle data-i18n="lang">EN</button>
+        </div>
+      </div>
+    </header>
+    <nav class="mobile-nav" aria-label="移动导航">
+      <a href="index.html">首页</a>
+      <a href="plugins.html" aria-current="page">插件</a>
+      <a href="about.html">关于</a>
+    </nav>
+
+    <main id="main" class="wrap detail">
+      <article>
+        <p class="crumb">
+          <a href="plugins.html">插件</a>
+          /
+          <a href="https://github.com/bowenliang123" rel="noreferrer">bowenliang123</a>
+          /
+          <a href="https://github.com/bowenliang123/dsh-context" rel="noreferrer">dsh-context</a>
+        </p>
+        <h1>bowenliang123/dsh-context</h1>
+        <p class="lede">
+          一站式 DeepSeek Harness 上下文可视化插件。Context 面板与 <code class="mono">/context</code> 命令，透视组成、演进、压缩和剪枝。
+        </p>
+        <p class="meta">作者 <a href="https://github.com/bowenliang123" rel="noreferrer">bowenliang123</a></p>
+
+        <div class="tabs" data-tabs role="tablist">
+          <button type="button" role="tab" data-tab="readme" aria-selected="true">README</button>
+          <button type="button" role="tab" data-tab="overview" aria-selected="false">概览</button>
+        </div>
+
+        <section class="tab-panel" data-panel="readme" role="tabpanel">
+          <div class="readme">
+            <h2>dsh-context</h2>
+            <p>The best DeepSeek Harness plugin for an agent’s context insights and management.</p>
+            <h3>你会看到什么</h3>
+            <ul>
+              <li>Context 标签：会话统计、组成、历史、事件和当前模型可见消息。</li>
+              <li><code>/context</code> 命令：弹出当前窗口占用、六类组成条，以及近 10 轮趋势。</li>
+            </ul>
+            <h3>Install</h3>
+            <pre>dsh plugin --profile web add github:bowenliang123/dsh-context#cf28676</pre>
+            <p>然后执行 <code>dsh web</code>。不用编译，也不用重启整个 Harness。</p>
+            <h3>License</h3>
+            <p>Apache-2.0</p>
+          </div>
+        </section>
+
+        <section class="tab-panel" data-panel="overview" role="tabpanel" hidden>
+          <div class="readme">
+            <h2>概览</h2>
+            <p>类型：工具 · 能力：开发 / 记忆。Star 122。最近提交 2026/8/18。</p>
+            <p>仓库声明了 <code class="mono">dsh</code> 字段，并能作为 Cordis bundle 挂到 Web profile。</p>
+          </div>
+        </section>
+      </article>
+
+      <aside class="install-panel">
+        <h2>安装</h2>
+        <p class="note">固定到提交 <code class="mono">cf28676</code>。</p>
+        <div class="clip">
+          <span class="clip-edge" aria-hidden="true"></span>
+          <code>dsh plugin --profile web add github:bowenliang123/dsh-context#cf28676</code>
+          <button
+            type="button"
+            data-copy="dsh plugin --profile web add github:bowenliang123/dsh-context#cf28676"
+          >
+            复制
+          </button>
+        </div>
+        <div class="panel-actions">
+          <a class="btn btn-sm" href="https://github.com/bowenliang123/dsh-context" rel="noreferrer">查看源码</a>
+          <a class="btn btn-ghost btn-sm" href="plugins.html">返回目录</a>
+        </div>
+        <dl class="facts">
+          <div>
+            <dt>协议</dt>
+            <dd>Apache-2.0</dd>
+          </div>
+          <div>
+            <dt>Stars</dt>
+            <dd>122</dd>
+          </div>
+          <div>
+            <dt>更新</dt>
+            <dd>2026/8/18</dd>
+          </div>
+          <div>
+            <dt>GitHub</dt>
+            <dd><a href="https://github.com/bowenliang123/dsh-context" rel="noreferrer">仓库</a></dd>
+          </div>
+        </dl>
+      </aside>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner wrap">
+        <div>
+          <p class="disclaimer">Bay 是社区项目，并非 DeepSeek 官方产品。</p>
+          <p class="crawl">目录更新于 2026年8月19日 17:00</p>
+        </div>
+        <nav class="footer-links">
+          <a href="about.html">关于</a>
+          <a href="https://github.com/deepseek-ai/deepseek-harness" rel="noreferrer">DeepSeek Harness</a>
+        </nav>
+      </div>
+    </footer>
+
+    <div class="overlay" data-overlay>
+      <div class="palette" role="dialog" aria-label="搜索插件">
+        <input data-palette-input type="search" placeholder="搜索插件、功能或作者" />
+        <div class="palette-list" data-palette-list></div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

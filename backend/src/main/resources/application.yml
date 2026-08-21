@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/bay;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  h2:
+    console:
+      enabled: ${BAY_H2_CONSOLE:true}
+
+bay:
+  github:
+    token: ${GITHUB_TOKEN:}
+    topic: dsh-plugin
+    max-pages: ${BAY_CRAWL_PAGES:5}
+  registry:
+    url: ${BAY_REGISTRY_URL:https://awesome-dsh-plugin.com/plugins.json}
+  crawl:
+    cron: "0 0 * * * *"
+    readme-limit: ${BAY_README_LIMIT:60}
+
+logging:
+  level:
+    market.bay: INFO

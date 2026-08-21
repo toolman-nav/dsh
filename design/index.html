@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bay · DSH 插件仓</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到内容</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-slot" aria-hidden="true"><img src="logo.png" alt="" width="36" height="36" /></span>
+          <span class="brand-type">
+            <strong>Bay</strong>
+            <small>DSH 插件仓</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href="index.html" aria-current="page" data-i18n="home">首页</a>
+          <a href="plugins.html" data-i18n="plugins">插件</a>
+          <a href="about.html" data-i18n="about">关于</a>
+        </nav>
+        <div class="header-tools">
+          <button class="icon-btn" type="button" data-open-search title="搜索">
+            ⌕
+          </button>
+          <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false" title="暗色">
+            ◐
+          </button>
+          <button class="icon-btn lang-btn" type="button" data-lang-toggle data-i18n="lang">
+            EN
+          </button>
+        </div>
+      </div>
+    </header>
+    <nav class="mobile-nav" aria-label="移动导航">
+      <a href="index.html" aria-current="page">首页</a>
+      <a href="plugins.html">插件</a>
+      <a href="about.html">关于</a>
+    </nav>
+
+    <main id="main" class="wrap home">
+      <section class="hero panel">
+        <p class="kicker">Community catalog · not official</p>
+        <h1>把插件插进 Harness</h1>
+        <p class="lede">
+          Bay 从 GitHub 的 <code class="mono">dsh-plugin</code> 话题收插件。搜到之后，复制安装命令即可。
+        </p>
+        <form class="search-bar" action="plugins.html" method="get">
+          <input
+            name="q"
+            type="search"
+            data-i18n-placeholder="search"
+            placeholder="搜索插件、功能或作者"
+            aria-label="搜索插件"
+          />
+          <button class="btn" type="submit" data-i18n="searchBtn">搜索</button>
+        </form>
+        <p class="hint" data-i18n="cmdk">按 ⌘K 全局搜索</p>
+        <div class="chips" aria-label="能力分类">
+          <a class="chip" href="plugins.html?q=开发">开发</a>
+          <a class="chip" href="plugins.html?q=浏览器">浏览器 / Web</a>
+          <a class="chip" href="plugins.html?q=搜索">搜索</a>
+          <a class="chip" href="plugins.html?q=主题">UI 主题</a>
+          <a class="chip" href="plugins.html?q=视觉">视觉</a>
+          <a class="chip" href="plugins.html?q=设计">设计</a>
+          <a class="chip" href="plugins.html">全部插件 →</a>
+        </div>
+      </section>
+
+      <section class="section panel">
+        <div class="backplane" aria-label="精选插件背板">
+          <div class="backplane-head">
+            <span>Featured modules</span>
+            <span>scroll →</span>
+          </div>
+          <div class="rail" data-rail></div>
+        </div>
+      </section>
+
+      <section class="section panel">
+        <div class="section-head">
+          <h2>精选</h2>
+          <a href="plugins.html">查看全部</a>
+        </div>
+        <div class="grid" data-grid="featured"></div>
+      </section>
+
+      <section class="section panel">
+        <div class="section-head">
+          <h2>最新上架</h2>
+          <a href="plugins.html">查看全部</a>
+        </div>
+        <div class="grid" data-grid="new"></div>
+      </section>
+
+      <section class="section panel">
+        <div class="section-head">
+          <h2>热门</h2>
+          <a href="plugins.html">查看全部</a>
+        </div>
+        <div class="grid" data-grid="popular"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner wrap">
+        <div>
+          <a class="brand" href="index.html">
+            <span class="brand-slot" aria-hidden="true"><img src="logo.png" alt="" width="36" height="36" /></span>
+            <span class="brand-type">
+              <strong>Bay</strong>
+              <small>DSH 插件仓</small>
+            </span>
+          </a>
+          <p class="disclaimer">
+            Bay 是社区项目，并非 DeepSeek 官方产品。
+          </p>
+          <p class="crawl">目录更新于 2026年8月19日 17:00</p>
+        </div>
+        <nav class="footer-links" aria-label="项目链接">
+          <a href="about.html">关于</a>
+          <a href="https://github.com/deepseek-ai/deepseek-harness" rel="noreferrer">DeepSeek Harness</a>
+        </nav>
+      </div>
+    </footer>
+
+    <div class="overlay" data-overlay>
+      <div class="palette" role="dialog" aria-label="搜索插件">
+        <input data-palette-input type="search" placeholder="搜索插件、功能或作者" />
+        <div class="palette-list" data-palette-list></div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

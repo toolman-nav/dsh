@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>插件 · Bay</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到内容</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-slot" aria-hidden="true"><img src="logo.png" alt="" width="36" height="36" /></span>
+          <span class="brand-type">
+            <strong>Bay</strong>
+            <small>DSH 插件仓</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href="index.html" data-i18n="home">首页</a>
+          <a href="plugins.html" aria-current="page" data-i18n="plugins">插件</a>
+          <a href="about.html" data-i18n="about">关于</a>
+        </nav>
+        <div class="header-tools">
+          <button class="icon-btn" type="button" data-open-search title="搜索">⌕</button>
+          <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false" title="暗色">◐</button>
+          <button class="icon-btn lang-btn" type="button" data-lang-toggle data-i18n="lang">EN</button>
+        </div>
+      </div>
+    </header>
+    <nav class="mobile-nav" aria-label="移动导航">
+      <a href="index.html">首页</a>
+      <a href="plugins.html" aria-current="page">插件</a>
+      <a href="about.html">关于</a>
+    </nav>
+
+    <main id="main" class="wrap">
+      <header class="page-head">
+        <h1>探索插件</h1>
+        <p>浏览、筛选，复制安装命令。</p>
+      </header>
+
+      <div class="catalog" data-catalog>
+        <aside class="filters" aria-label="筛选">
+          <div class="filter-head">
+            <h2>筛选</h2>
+            <button class="btn btn-ghost btn-sm sheet-close" type="button" data-close-filters>关闭</button>
+          </div>
+
+          <div class="filter-group">
+            <h3>能力</h3>
+            <div class="filter-list">
+              <label><input type="checkbox" data-filter-cap value="开发" /> 开发</label>
+              <label><input type="checkbox" data-filter-cap value="Git / GitHub" /> Git / GitHub</label>
+              <label><input type="checkbox" data-filter-cap value="浏览器 / Web" /> 浏览器 / Web</label>
+              <label><input type="checkbox" data-filter-cap value="设计" /> 设计</label>
+              <label><input type="checkbox" data-filter-cap value="视觉" /> 视觉</label>
+              <label><input type="checkbox" data-filter-cap value="搜索" /> 搜索</label>
+              <label><input type="checkbox" data-filter-cap value="效率工具" /> 效率工具</label>
+              <label><input type="checkbox" data-filter-cap value="UI 主题" /> UI 主题</label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <h3>类型</h3>
+            <div class="filter-list">
+              <label><input type="checkbox" data-filter-type value="工具" /> 工具</label>
+              <label><input type="checkbox" data-filter-type value="服务" /> 服务</label>
+              <label><input type="checkbox" data-filter-type value="客户端 UI" /> 客户端 UI</label>
+              <label><input type="checkbox" data-filter-type value="工作流" /> 工作流</label>
+              <label><input type="checkbox" data-filter-type value="主题" /> 主题</label>
+              <label><input type="checkbox" data-filter-type value="非插件" /> 非插件</label>
+            </div>
+          </div>
+        </aside>
+
+        <section class="results-panel">
+          <div class="toolbar">
+            <form class="search-bar" action="plugins.html" method="get" onsubmit="return false">
+              <input
+                data-plugin-search
+                type="search"
+                data-i18n-placeholder="search"
+                placeholder="搜索插件、功能或作者"
+                aria-label="搜索插件"
+              />
+            </form>
+            <label class="chip"><input type="checkbox" data-only-featured /> 仅看精选</label>
+            <button class="btn btn-ghost btn-sm sheet-btn" type="button" data-open-filters>筛选</button>
+            <div class="view-toggle" role="group" aria-label="视图">
+              <button type="button" data-view="grid" aria-pressed="true" title="网格">▦</button>
+              <button type="button" data-view="list" aria-pressed="false" title="列表">☰</button>
+            </div>
+            <span class="toolbar-count" data-count>共 12 个插件</span>
+          </div>
+
+          <div class="active-chips" data-active-chips></div>
+          <div class="grid results" data-results></div>
+          <div class="empty" data-empty hidden>
+            <h2>没有插上槽的模块</h2>
+            <p>换一个关键词，或清掉筛选。GitHub 上没有匹配的仓库。</p>
+          </div>
+          <button class="btn btn-ghost load-more" type="button">加载更多</button>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner wrap">
+        <div>
+          <p class="disclaimer">Bay 是社区项目，并非 DeepSeek 官方产品。</p>
+          <p class="crawl">目录更新于 2026年8月19日 17:00</p>
+        </div>
+        <nav class="footer-links">
+          <a href="about.html">关于</a>
+          <a href="https://github.com/deepseek-ai/deepseek-harness" rel="noreferrer">DeepSeek Harness</a>
+        </nav>
+      </div>
+    </footer>
+
+    <div class="overlay" data-overlay>
+      <div class="palette" role="dialog" aria-label="搜索插件">
+        <input data-palette-input type="search" placeholder="搜索插件、功能或作者" />
+        <div class="palette-list" data-palette-list></div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>

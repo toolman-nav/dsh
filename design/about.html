@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>关于 · Bay</title>
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">跳到内容</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="index.html">
+          <span class="brand-slot" aria-hidden="true"><img src="logo.png" alt="" width="36" height="36" /></span>
+          <span class="brand-type">
+            <strong>Bay</strong>
+            <small>DSH 插件仓</small>
+          </span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href="index.html" data-i18n="home">首页</a>
+          <a href="plugins.html" data-i18n="plugins">插件</a>
+          <a href="about.html" aria-current="page" data-i18n="about">关于</a>
+        </nav>
+        <div class="header-tools">
+          <button class="icon-btn" type="button" data-open-search title="搜索">⌕</button>
+          <button class="icon-btn" type="button" data-theme-toggle aria-pressed="false" title="暗色">◐</button>
+          <button class="icon-btn lang-btn" type="button" data-lang-toggle data-i18n="lang">EN</button>
+        </div>
+      </div>
+    </header>
+    <nav class="mobile-nav" aria-label="移动导航">
+      <a href="index.html">首页</a>
+      <a href="plugins.html">插件</a>
+      <a href="about.html" aria-current="page">关于</a>
+    </nav>
+
+    <main id="main" class="wrap about-block">
+      <p class="kicker">Community project</p>
+      <h1>Bay 不是官方市场</h1>
+      <p class="lede">
+        Bay 索引 GitHub 上带 <code class="mono">dsh-plugin</code> 话题的仓库，方便你发现 DeepSeek Harness 插件。它不审核、不担保、不执行第三方代码。
+      </p>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner wrap">
+        <div>
+          <p class="disclaimer">Bay 是社区项目，并非 DeepSeek 官方产品。</p>
+          <p class="crawl">目录更新于 2026年8月19日 17:00</p>
+        </div>
+        <nav class="footer-links">
+          <a href="https://github.com/deepseek-ai/deepseek-harness" rel="noreferrer">DeepSeek Harness</a>
+        </nav>
+      </div>
+    </footer>
+    <div class="overlay" data-overlay>
+      <div class="palette" role="dialog" aria-label="搜索插件">
+        <input data-palette-input type="search" placeholder="搜索插件、功能或作者" />
+        <div class="palette-list" data-palette-list></div>
+      </div>
+    </div>
+    <script src="app.js"></script>
+  </body>
+</html>
