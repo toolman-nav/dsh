@@ -2,7 +2,7 @@
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { fetchMeta, fetchPlugins } from "./api.js";
-import { formatDate, pluginFullLabel, pluginHref, plainText, t, ui } from "./ui.js";
+import { applyTheme, formatDate, pluginFullLabel, pluginHref, plainText, t, toggleLang, toggleTheme, ui } from "./ui.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -33,6 +33,7 @@ function onKey(e) {
 
 onMounted(async () => {
   document.addEventListener("keydown", onKey);
+  applyTheme();
   try {
     const meta = await fetchMeta();
     lastCrawledAt.value = formatDate(meta.lastCrawledAt);
@@ -73,6 +74,23 @@ function goSearch(q) {
         <RouterLink to="/plugins" :aria-current="current('plugins') || current('plugin')">{{ t("插件", "Plugins") }}</RouterLink>
         <RouterLink to="/about" :aria-current="current('about')">{{ t("关于", "About") }}</RouterLink>
       </nav>
+      <div class="header-tools">
+        <button class="icon-btn" type="button" :title="t('搜索', 'Search')" @click="ui.paletteOpen = true">
+          ⌕
+        </button>
+        <button
+          class="icon-btn"
+          type="button"
+          :aria-pressed="ui.theme === 'dark'"
+          :title="t('暗色', 'Dark')"
+          @click="toggleTheme"
+        >
+          ◐
+        </button>
+        <button class="icon-btn lang-btn" type="button" @click="toggleLang">
+          {{ ui.lang === "zh" ? "EN" : "中文" }}
+        </button>
+      </div>
     </div>
   </header>
   <nav class="mobile-nav" aria-label="移动导航">

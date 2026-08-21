@@ -46,11 +46,12 @@ function search() {
 <template>
   <main id="main" class="wrap home">
     <section class="hero panel">
-      <h1>{{ t("DSH 插件仓", "DSH plugin catalog") }}</h1>
+      <p class="kicker">Community catalog · not official</p>
+      <h1>{{ t("把插件插进 Harness", "Plug into Harness") }}</h1>
       <p class="lede">
-        {{ t("收录社区可安装插件，并用 GitHub", "A community catalog of installable plugins, plus GitHub") }}
+        {{ t("Bay 从 GitHub 的", "Bay collects plugins from the GitHub") }}
         <code class="mono">dsh-plugin</code>
-        {{ t("话题补漏。搜到之后复制安装命令即可。", "topic updates. Search, then copy the install command.") }}
+        {{ t("话题收插件。搜到之后，复制安装命令即可。", " topic. Search, then copy the install command.") }}
       </p>
       <form class="search-bar" @submit.prevent="search">
         <input
@@ -60,16 +61,17 @@ function search() {
         />
         <button class="btn" type="submit">{{ t("搜索", "Search") }}</button>
       </form>
+      <p class="hint">{{ t("按 ⌘K 全局搜索", "Press ⌘K to search") }}</p>
       <p class="hint" v-if="home.total">
         {{ t(`已收录 ${home.total} 个插件`, `${home.total} plugins indexed`) }}
       </p>
       <div class="chips">
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '界面增强' } }">{{ t("界面增强", "UI") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '工具与能力' } }">{{ t("工具与能力", "Tools") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '开发运行时' } }">{{ t("开发", "Dev") }}</RouterLink>
         <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '浏览器 / Web' } }">{{ t("浏览器 / Web", "Browser / Web") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '主题外观' } }">{{ t("主题外观", "Themes") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '视觉与多模态' } }">{{ t("视觉与多模态", "Vision") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '记忆' } }">{{ t("记忆", "Memory") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { q: '搜索' } }">{{ t("搜索", "Search") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '主题外观' } }">{{ t("UI 主题", "UI themes") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '视觉与多模态' } }">{{ t("视觉", "Vision") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '界面增强' } }">{{ t("设计", "Design") }}</RouterLink>
         <RouterLink class="chip" to="/plugins">{{ t("全部插件 →", "All plugins →") }}</RouterLink>
       </div>
     </section>
@@ -78,18 +80,30 @@ function search() {
     <p v-if="error" class="lede">{{ error }}</p>
 
     <section class="section panel" v-if="home.featured.length">
+      <div class="backplane" aria-label="精选插件背板">
+        <div class="backplane-head">
+          <span>Featured modules</span>
+          <span>scroll →</span>
+        </div>
+        <div class="rail" :class="{ 'is-auto': !reduceMotion }" :style="{ '--rail-duration': railDuration }">
+          <div class="rail-track">
+            <RouterLink v-for="(p, i) in featuredLoop" :key="`${p.id}-${i}`" class="module" :to="pluginHref(p)">
+              <div class="module-title">{{ pluginTitle(p) }}</div>
+              <p>{{ plainText(p.description) }}</p>
+              <div class="module-meta">★ {{ formatStars(p.stars) }}</div>
+            </RouterLink>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section panel" v-if="home.featured.length">
       <div class="section-head">
         <h2>{{ t("精选", "Featured") }}</h2>
         <RouterLink :to="{ name: 'plugins', query: { featured: '1' } }">{{ t("查看全部", "View all") }}</RouterLink>
       </div>
-      <div class="rail" :class="{ 'is-auto': !reduceMotion }" :style="{ '--rail-duration': railDuration }">
-        <div class="rail-track">
-          <RouterLink v-for="(p, i) in featuredLoop" :key="`${p.id}-${i}`" class="module" :to="pluginHref(p)">
-            <div class="module-title">{{ pluginTitle(p) }}</div>
-            <p>{{ plainText(p.description) }}</p>
-            <div class="module-meta">★ {{ formatStars(p.stars) }}</div>
-          </RouterLink>
-        </div>
+      <div class="grid">
+        <PluginCard v-for="p in home.featured" :key="p.id" :plugin="p" />
       </div>
     </section>
 

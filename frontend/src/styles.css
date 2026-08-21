@@ -221,6 +221,8 @@ code,
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .icon-btn {
@@ -372,11 +374,31 @@ code,
 }
 
 /* Featured rail */
+.backplane {
+  background: var(--slot);
+  color: #e8eef4;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.backplane-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 16px 20px 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #9aabc0;
+}
+
 .rail {
   width: 100%;
   min-width: 0;
   overflow: hidden;
-  padding: 2px 0;
+  padding: 8px 16px 20px;
 }
 
 .rail:not(.is-auto) {
@@ -422,6 +444,17 @@ code,
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+.backplane .module {
+  background: #1a2436;
+  border: 1px solid #2a364a;
+  color: #e8eef4;
+}
+
+.backplane .module p,
+.backplane .module-meta {
+  color: #9aabc0;
 }
 
 .module:hover {
