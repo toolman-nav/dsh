@@ -1,3 +1,8 @@
-name = "dshpluginlist"
-# dist 不进 git；Git 同步到 Pages 时发布已构建的 design/（与本地 5173 同一套 Vue 包）
-pages_build_output_dir = "design"
+name = "dsh"
+compatibility_date = "2026-08-21"
+
+# Git 接到的是 Workers Builds（检查名 Workers Builds: dsh），不是 Pages。
+# 静态 Vue 包在 design/，与本地 5173 同一套。
+[assets]
+directory = "./design"
+not_found_handling = "single-page-application"

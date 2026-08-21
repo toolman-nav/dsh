@@ -29,9 +29,9 @@ npm run dev
 
 前端开发时把 `/api` 代理到 `http://127.0.0.1:8080`。
 
-## 静态站（GitHub → Cloudflare Pages）
+## 静态站（GitHub → Cloudflare Worker `dsh`）
 
-流程：本地改好 → `git push` → Pages 跟 `main` 同步。`frontend/dist` 不进 git，发布目录是已构建的 `design/`（与本地 5173 同一套 Vue 包）。
+仓库接到的是 **Workers Builds**（GitHub 检查名 `Workers Builds: dsh`），不是 Pages 构建。`wrangler.toml` 用 `[assets]` 发布 `design/`。流程：本地改好 → `git push origin main` → 自动发版。
 
 ```bash
 # 有新目录数据时（需本地后端）
@@ -45,14 +45,7 @@ git commit -m "Update static catalog snapshot"
 git push origin main
 ```
 
-Pages 项目请这样接仓库 https://github.com/toolman-nav/dsh ：
-
-- Production branch：`main`
-- 构建命令：留空
-- 输出目录：`design`
-- **不要**填 `VITE_API_BASE`
-
-`design/_redirects` 已把 SPA 路由回退到 `index.html`。详情 README 按需从 jsDelivr / GitHub raw 拉。
+不要填 `VITE_API_BASE`。SPA 路由由 `not_found_handling = "single-page-application"` 回退到 `index.html`。详情 README 按需从 jsDelivr / GitHub raw 拉。
 
 本地开发仍用 `frontend` + Vite：http://127.0.0.1:5173/
 
