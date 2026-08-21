@@ -2,6 +2,7 @@
   "name": "dsh",
   "private": true,
   "scripts": {
-    "build": "node -e \"console.log('static assets already in design/')\""
+    "build": "node -e \"console.log('static assets already in design/')\"",
+    "deploy": "wrangler pages deploy ./design --project-name dsh"
   }
 }
