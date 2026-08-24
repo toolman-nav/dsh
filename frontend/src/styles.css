@@ -20,9 +20,9 @@
   --radius-sm: 12px;
   --max: 1180px;
   --header-h: 64px;
-  --font-display: "Bricolage Grotesque", "Figtree", sans-serif;
-  --font-body: "Figtree", "PingFang SC", "Noto Sans SC", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Avenir Next", "Trebuchet MS", "PingFang SC", "Noto Sans SC", sans-serif;
+  --font-body: "Avenir Next", "PingFang SC", "Noto Sans SC", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 [data-theme="dark"] {
