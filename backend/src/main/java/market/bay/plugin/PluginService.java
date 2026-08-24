@@ -31,10 +31,10 @@ public class PluginService {
     }
 
     public Map<String, Object> home() {
-        List<PluginView> featured = pluginRepository.findTop6ByFeaturedTrueOrderByStarsDesc()
+        List<PluginView> featured = pluginRepository.findTop12ByFeaturedTrueOrderByStarsDesc()
                 .stream().map(p -> PluginView.from(p, false)).toList();
         if (featured.isEmpty()) {
-            featured = pluginRepository.findTop6ByPluginLikeTrueOrderByStarsDesc()
+            featured = pluginRepository.findTop12ByPluginLikeTrueOrderByStarsDesc()
                     .stream().map(p -> PluginView.from(p, false)).toList();
         }
         return Map.of(
@@ -42,9 +42,9 @@ public class PluginService {
                 "topicTotal", pluginRepository.count(),
                 "lastCrawledAt", lastCrawledAt(),
                 "featured", featured,
-                "newest", pluginRepository.findTop6ByPluginLikeTrueOrderByPushedAtDesc()
+                "newest", pluginRepository.findTop12ByPluginLikeTrueOrderByPushedAtDesc()
                         .stream().map(p -> PluginView.from(p, false)).toList(),
-                "popular", pluginRepository.findTop6ByPluginLikeTrueOrderByStarsDesc()
+                "popular", pluginRepository.findTop12ByPluginLikeTrueOrderByStarsDesc()
                         .stream().map(p -> PluginView.from(p, false)).toList()
         );
     }

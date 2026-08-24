@@ -81,10 +81,10 @@ function sortPlugins(plugins, sort) {
 function homeFromCatalog(catalog) {
   const plugins = likePlugins(catalog.plugins);
   const featured = plugins.filter((plugin) => plugin.featured).slice(0, 12);
-  const newest = [...plugins].sort((a, b) => compareIso(a.updatedAt, b.updatedAt)).slice(0, 8);
-  const popular = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 8);
+  const newest = [...plugins].sort((a, b) => compareIso(a.updatedAt, b.updatedAt)).slice(0, 12);
+  const popular = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 12);
   return {
-    featured: featured.length ? featured : popular.slice(0, 8),
+    featured: featured.length ? featured : popular.slice(0, 12),
     newest,
     popular,
     total: plugins.length,

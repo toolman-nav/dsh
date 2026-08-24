@@ -25,8 +25,8 @@ function sliceCatalog() {
   const catalog = JSON.parse(readFileSync(resolve(root, "public/catalog.json"), "utf8"));
   const all = Array.isArray(catalog.plugins) ? catalog.plugins : [];
   const plugins = all.filter((plugin) => plugin.pluginLike);
-  const newest = [...plugins].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))).slice(0, 8);
-  const popular = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 8);
+  const newest = [...plugins].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))).slice(0, 12);
+  const popular = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 12);
   const featured = plugins.filter((plugin) => plugin.featured).slice(0, 12);
   const meta = {
     lastCrawledAt: catalog.lastCrawledAt || "",
@@ -37,7 +37,7 @@ function sliceCatalog() {
     meta,
     home: {
       ...meta,
-      featured: featured.length ? featured : popular.slice(0, 8),
+      featured: featured.length ? featured : popular.slice(0, 12),
       newest,
       popular,
     },

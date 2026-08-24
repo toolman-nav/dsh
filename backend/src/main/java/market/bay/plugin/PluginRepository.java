@@ -10,11 +10,11 @@ import java.util.List;
 
 public interface PluginRepository extends JpaRepository<Plugin, String> {
 
-    List<Plugin> findTop6ByFeaturedTrueOrderByStarsDesc();
+    List<Plugin> findTop12ByFeaturedTrueOrderByStarsDesc();
 
-    List<Plugin> findTop6ByPluginLikeTrueOrderByPushedAtDesc();
+    List<Plugin> findTop12ByPluginLikeTrueOrderByPushedAtDesc();
 
-    List<Plugin> findTop6ByPluginLikeTrueOrderByStarsDesc();
+    List<Plugin> findTop12ByPluginLikeTrueOrderByStarsDesc();
 
     @Query("""
             SELECT p FROM Plugin p

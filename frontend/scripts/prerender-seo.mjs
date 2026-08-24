@@ -180,7 +180,7 @@ writePage("about", aboutHtml);
 const dataDir = resolve(outDir, "data");
 mkdirSync(dataDir, { recursive: true });
 const meta = { lastCrawledAt: catalog.lastCrawledAt || "", total: plugins.length, topicTotal: allPlugins.length };
-const home = { ...meta, featured: featured.slice(0, 6), newest: byUpdated.slice(0, 6), popular: byStars.slice(0, 6) };
+const home = { ...meta, featured: featured.slice(0, 12), newest: byUpdated.slice(0, 12), popular: byStars.slice(0, 12) };
 const indexKeys = ["id", "owner", "name", "description", "stars", "updatedAt", "createdAt", "topics", "capability", "kind", "featured", "pluginLike", "installCommand"];
 const catalogIndex = allPlugins.map((plugin) => Object.fromEntries(indexKeys.map((key) => [key, plugin[key]])));
 writeFileSync(resolve(dataDir, "meta.json"), JSON.stringify(meta));
