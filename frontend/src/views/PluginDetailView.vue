@@ -4,7 +4,7 @@ import { RouterLink, useRoute } from "vue-router";
 import { fetchPlugin, hydrateReadme } from "../api.js";
 import { renderReadme } from "../readme.js";
 import { pluginJsonLd, setSeo } from "../seo.js";
-import { copyText, formatDate, formatStars, pickReadme, pluginFullLabel, plainText, t, ui } from "../ui.js";
+import { copyText, formatDate, formatStars, pickReadme, pluginFullLabel, pluginHue, pluginInitials, plainText, t, ui } from "../ui.js";
 
 const route = useRoute();
 const plugin = ref(null);
@@ -100,8 +100,13 @@ async function copyInstall(event) {
         /
         <a :href="plugin.htmlUrl" target="_blank" rel="noreferrer">{{ plugin.name }}</a>
       </p>
-      <h1>{{ pluginFullLabel(plugin) }}</h1>
-      <p class="lede">{{ plainText(plugin.description) }}</p>
+      <div class="detail-title">
+        <span class="mark mark-lg" :style="{ '--h': pluginHue(plugin) }">{{ pluginInitials(plugin) }}</span>
+        <div>
+          <h1>{{ pluginFullLabel(plugin) }}</h1>
+          <p class="lede">{{ plainText(plugin.description) }}</p>
+        </div>
+      </div>
 
       <div class="tabs" role="tablist">
         <button type="button" :aria-selected="tab === 'readme'" @click="tab = 'readme'">README</button>

@@ -2,14 +2,21 @@ import { catalogDetail, catalogHome, catalogMeta, catalogSearch } from "./catalo
 import { normalizePlugin } from "./taxonomy.js";
 
 const API = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
-const useStatic = !API && (import.meta.env.PROD || import.meta.env.VITE_STATIC === "1");
+const useStatic = !API;
 
-async function getJson(path) {
-  const res = await fetch(`${API}${path}`);
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status}`);
+async function getJson(path, timeoutMs = 2500) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API}${path}`, { signal: controller.signal });
+    const type = res.headers.get("content-type") || "";
+    if (!res.ok || !type.includes("json")) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+    return await res.json();
+  } finally {
+    clearTimeout(timer);
   }
-  return res.json();
 }
 
 function normalizePlugins(items) {
@@ -32,40 +39,64 @@ function normalizePage(data) {
   };
 }
 
+async function fromApiOrCatalog(apiCall, catalogCall) {
+  if (useStatic) {
+    return catalogCall();
+  }
+  try {
+    return await apiCall();
+  } catch {
+    return catalogCall();
+  }
+}
+
+function assertHome(data) {
+  if (!data || !Array.isArray(data.featured) || !Array.isArray(data.newest) || !Array.isArray(data.popular)) {
+    throw new Error("invalid home payload");
+  }
+  return data;
+}
+
 export async function fetchHome() {
-  return normalizeHome(await (useStatic ? catalogHome() : getJson("/api/home")));
+  return normalizeHome(
+    await fromApiOrCatalog(async () => assertHome(await getJson("/api/home")), catalogHome)
+  );
 }
 
 export function fetchMeta() {
-  return useStatic ? catalogMeta() : getJson("/api/meta");
+  return fromApiOrCatalog(() => getJson("/api/meta"), catalogMeta);
 }
 
 export async function fetchPlugins({ q = "", capability = "", kind = "", featured = false, includeAll = false, sort = "updated", page = 0, size = 24 } = {}) {
-  if (useStatic) {
-    return normalizePage(await catalogSearch({ q, capability, kind, featured, includeAll, sort, page, size }));
-  }
-  const params = new URLSearchParams({
-    q,
-    capability,
-    kind,
-    featured: String(featured),
-    includeAll: String(includeAll),
-    sort,
-    page: String(page),
-    size: String(size),
-  });
-  return normalizePage(await getJson(`/api/plugins?${params}`));
+  return normalizePage(
+    await fromApiOrCatalog(
+      () => {
+        const params = new URLSearchParams({
+          q,
+          capability,
+          kind,
+          featured: String(featured),
+          includeAll: String(includeAll),
+          sort,
+          page: String(page),
+          size: String(size),
+        });
+        return getJson(`/api/plugins?${params}`);
+      },
+      () => catalogSearch({ q, capability, kind, featured, includeAll, sort, page, size })
+    )
+  );
 }
 
 export async function fetchPlugin(owner, name) {
-  if (useStatic) {
-    const plugin = await catalogDetail(owner, name);
-    if (!plugin) {
-      throw new Error("HTTP 404");
-    }
-    return normalizePlugin(plugin);
+  const plugin = await fromApiOrCatalog(
+    () => getJson(`/api/plugins/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`),
+    () => catalogDetail(owner, name)
+  );
+  if (!plugin) {
+    throw new Error("HTTP 404");
   }
-  return normalizePlugin(await getJson(`/api/plugins/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`));
+  return normalizePlugin(plugin);
 }
 
 function githubRepo(plugin) {

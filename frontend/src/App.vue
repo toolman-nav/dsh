@@ -2,7 +2,7 @@
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { fetchMeta, fetchPlugins } from "./api.js";
-import { applyTheme, formatDate, pluginFullLabel, pluginHref, plainText, t, toggleLang, toggleTheme, ui } from "./ui.js";
+import { applyTheme, formatDate, pluginFullLabel, pluginHref, pluginHue, pluginInitials, plainText, t, toggleLang, toggleTheme, ui } from "./ui.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -76,7 +76,7 @@ function goSearch(q) {
       </nav>
       <div class="header-tools">
         <button class="icon-btn" type="button" :title="t('搜索', 'Search')" @click="ui.paletteOpen = true">
-          ⌕
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
         <button
           class="icon-btn"
@@ -85,7 +85,8 @@ function goSearch(q) {
           :title="t('切换深色模式', 'Toggle dark mode')"
           @click="toggleTheme"
         >
-          ◐
+          <svg v-if="ui.theme === 'dark'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.2 6.2l1.4 1.4M16.4 16.4l1.4 1.4M17.8 6.2l-1.4 1.4M7.6 16.4l-1.4 1.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg v-else viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3.5A8 8 0 1 0 20.5 14 6.2 6.2 0 0 1 15 3.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
         </button>
         <button class="icon-btn lang-btn" type="button" @click="toggleLang">
           {{ ui.lang === "zh" ? "EN" : "中文" }}
@@ -134,11 +135,15 @@ function goSearch(q) {
         <RouterLink
           v-for="p in paletteHits"
           :key="p.id"
+          class="palette-hit"
           :to="pluginHref(p)"
           @click="closePalette"
         >
-          <strong class="mono">{{ pluginFullLabel(p) }}</strong>
-          <small>{{ plainText(p.description) }}</small>
+          <span class="mark mark-sm" :style="{ '--h': pluginHue(p) }">{{ pluginInitials(p) }}</span>
+          <span class="palette-hit-text">
+            <strong class="mono">{{ pluginFullLabel(p) }}</strong>
+            <small>{{ plainText(p.description) }}</small>
+          </span>
         </RouterLink>
         <p v-if="paletteQuery && !paletteHits.length" class="palette-empty">
           {{ t("没有匹配的插件", "No matching plugins") }}

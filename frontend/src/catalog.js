@@ -1,29 +1,55 @@
 const BASE_URL = String(import.meta.env.BASE_URL || "/").replace(/\/?$/, "/");
-const DATA_URL = `${BASE_URL}data/`;
 
+let catalogPromise;
 let indexPromise;
 let metaPromise;
 let homePromise;
 
-async function loadJson(path) {
-  const response = await fetch(`${DATA_URL}${path}`);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+async function tryJson(path) {
+  try {
+    const response = await fetch(`${BASE_URL}${path}`);
+    const type = response.headers.get("content-type") || "";
+    if (!response.ok || !type.includes("json")) {
+      return null;
+    }
+    return await response.json();
+  } catch {
+    return null;
   }
-  return response.json();
 }
 
-function loadIndex() {
-  if (!indexPromise) {
-    indexPromise = loadJson("catalog-index.json").then((data) => ({
-      plugins: Array.isArray(data.plugins) ? data.plugins : [],
-    }));
-  }
-  return indexPromise;
+function likePlugins(plugins) {
+  return (Array.isArray(plugins) ? plugins : []).filter((plugin) => plugin.pluginLike);
 }
 
 function compareIso(a, b) {
   return String(b || "").localeCompare(String(a || ""));
+}
+
+async function loadCatalog() {
+  if (!catalogPromise) {
+    catalogPromise = tryJson("catalog.json").then((data) => {
+      if (!data || !Array.isArray(data.plugins)) {
+        throw new Error("catalog.json missing");
+      }
+      return data;
+    });
+  }
+  return catalogPromise;
+}
+
+function loadIndex() {
+  if (!indexPromise) {
+    indexPromise = (async () => {
+      const sharded = await tryJson("data/catalog-index.json");
+      if (sharded && Array.isArray(sharded.plugins)) {
+        return { plugins: sharded.plugins };
+      }
+      const catalog = await loadCatalog();
+      return { plugins: catalog.plugins };
+    })();
+  }
+  return indexPromise;
 }
 
 function matches(plugin, { q, capability, kind, featured, includeAll }) {
@@ -52,13 +78,45 @@ function sortPlugins(plugins, sort) {
   return copy;
 }
 
+function homeFromCatalog(catalog) {
+  const plugins = likePlugins(catalog.plugins);
+  const featured = plugins.filter((plugin) => plugin.featured).slice(0, 12);
+  const newest = [...plugins].sort((a, b) => compareIso(a.updatedAt, b.updatedAt)).slice(0, 8);
+  const popular = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 8);
+  return {
+    featured: featured.length ? featured : popular.slice(0, 8),
+    newest,
+    popular,
+    total: plugins.length,
+    lastCrawledAt: catalog.lastCrawledAt || "",
+  };
+}
+
 export function catalogMeta() {
-  if (!metaPromise) metaPromise = loadJson("meta.json");
+  if (!metaPromise) {
+    metaPromise = (async () => {
+      const sharded = await tryJson("data/meta.json");
+      if (sharded) return sharded;
+      const catalog = await loadCatalog();
+      const plugins = catalog.plugins || [];
+      return {
+        lastCrawledAt: catalog.lastCrawledAt || "",
+        total: likePlugins(plugins).length,
+        topicTotal: plugins.length,
+      };
+    })();
+  }
   return metaPromise;
 }
 
 export function catalogHome() {
-  if (!homePromise) homePromise = loadJson("home.json");
+  if (!homePromise) {
+    homePromise = (async () => {
+      const sharded = await tryJson("data/home.json");
+      if (sharded && Array.isArray(sharded.featured)) return sharded;
+      return homeFromCatalog(await loadCatalog());
+    })();
+  }
   return homePromise;
 }
 
@@ -91,11 +149,16 @@ export async function catalogSearch({
 }
 
 export async function catalogDetail(owner, name) {
-  const path = `plugins/${encodeURIComponent(String(owner || ""))}/${encodeURIComponent(String(name || ""))}.json`;
-  try {
-    return await loadJson(path);
-  } catch (error) {
-    if (String(error?.message).includes("HTTP 404")) return null;
-    throw error;
-  }
+  const expected = `${owner}/${name}`;
+  const sharded = await tryJson(
+    `data/plugins/${encodeURIComponent(String(owner || ""))}/${encodeURIComponent(String(name || ""))}.json`
+  );
+  if (sharded) return sharded;
+  const { plugins } = await loadIndex();
+  return (
+    plugins.find(
+      (plugin) =>
+        plugin.id === expected || (plugin.owner === owner && String(plugin.name) === String(name))
+    ) || null
+  );
 }

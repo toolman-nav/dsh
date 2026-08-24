@@ -97,6 +97,26 @@ export function pluginFullLabel(plugin) {
   return owner ? `${owner}/${title}` : title;
 }
 
+export function pluginHue(plugin) {
+  const s = String(plugin?.id || plugin?.name || "");
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 33 + s.charCodeAt(i)) >>> 0;
+  return h % 360;
+}
+
+export function pluginInitials(plugin) {
+  const title = pluginTitle(plugin);
+  const latin = title.match(/[A-Za-z0-9]+/g);
+  if (latin && latin.join("").length >= 2) {
+    if (latin.length >= 2) return (latin[0][0] + latin[1][0]).toUpperCase();
+    return latin[0].slice(0, 2).toUpperCase();
+  }
+  const chars = Array.from(title);
+  if (!chars.length) return "P";
+  if (/[\u4e00-\u9fff]/.test(chars[0])) return chars[0];
+  return chars.slice(0, 2).join("").toUpperCase();
+}
+
 export function plainText(value) {
   return String(value ?? "")
     .replace(/```[\s\S]*?```/g, " ")

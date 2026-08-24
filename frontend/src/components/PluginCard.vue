@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { copyText, formatDate, formatStars, pluginHref, pluginTitle, plainText, t } from "../ui.js";
+import { copyText, formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, t } from "../ui.js";
 
 const props = defineProps({
   plugin: { type: Object, required: true },
@@ -23,15 +23,24 @@ async function copyCmd(event) {
 <template>
   <article class="card" role="link" tabindex="0" @click="open" @keydown.enter="open">
     <div class="card-body">
-      <div class="card-top">
-        <span class="card-title">{{ pluginTitle(plugin) }}</span>
-        <span class="stars">★ {{ formatStars(plugin.stars) }}</span>
-      </div>
-      <div class="meta">
-        <span>{{ plugin.owner }}</span>
-        <span class="meta-dot">{{ t("更新于", "updated") }} {{ formatDate(plugin.updatedAt) }}</span>
+      <div class="card-head">
+        <span class="mark" :style="{ '--h': pluginHue(plugin) }">{{ pluginInitials(plugin) }}</span>
+        <div class="card-head-text">
+          <div class="card-top">
+            <span class="card-title">{{ pluginTitle(plugin) }}</span>
+            <span class="stars">★ {{ formatStars(plugin.stars) }}</span>
+          </div>
+          <div class="meta">
+            <span>{{ plugin.owner }}</span>
+            <span class="meta-dot">{{ t("更新于", "updated") }} {{ formatDate(plugin.updatedAt) }}</span>
+          </div>
+        </div>
       </div>
       <p>{{ plainText(plugin.description) || t("暂无描述。", "No description.") }}</p>
+      <div class="card-tags" v-if="plugin.capability || plugin.kind">
+        <span v-if="plugin.capability" class="tag">{{ plugin.capability }}</span>
+        <span v-if="plugin.kind" class="tag">{{ plugin.kind }}</span>
+      </div>
       <div class="cmd">
         <code>{{ plugin.installCommand }}</code>
         <button
