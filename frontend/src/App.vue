@@ -2,7 +2,7 @@
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import { fetchMeta, fetchPlugins } from "./api.js";
-import { applyTheme, formatDate, pluginFullLabel, pluginHref, pluginHue, pluginInitials, plainText, t, toggleLang, toggleTheme, ui } from "./ui.js";
+import { applyTheme, formatDate, pluginFullLabel, pluginHref, pluginHue, pluginInitials, plainText, searchHotkeyLabel, t, toggleLang, toggleTheme, ui } from "./ui.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -23,16 +23,23 @@ function closePalette() {
   ui.paletteOpen = false;
 }
 
+function isSearchHotkey(e) {
+  const isK = e.code === "KeyK" || (e.key || "").toLowerCase() === "k";
+  return isK && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey;
+}
+
 function onKey(e) {
-  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+  if (isSearchHotkey(e)) {
     e.preventDefault();
+    e.stopPropagation();
     ui.paletteOpen = !ui.paletteOpen;
+    return;
   }
   if (e.key === "Escape") closePalette();
 }
 
 onMounted(async () => {
-  document.addEventListener("keydown", onKey);
+  window.addEventListener("keydown", onKey, true);
   applyTheme();
   try {
     const meta = await fetchMeta();
@@ -41,7 +48,7 @@ onMounted(async () => {
     /* backend may still be starting */
   }
 });
-onUnmounted(() => document.removeEventListener("keydown", onKey));
+onUnmounted(() => window.removeEventListener("keydown", onKey, true));
 
 watch(
   () => ui.paletteOpen,
@@ -75,7 +82,7 @@ function goSearch(q) {
         <RouterLink to="/about/" :aria-current="current('about')">{{ t("关于", "About") }}</RouterLink>
       </nav>
       <div class="header-tools">
-        <button class="icon-btn" type="button" :title="t('搜索', 'Search')" @click="ui.paletteOpen = true">
+        <button class="icon-btn" type="button" :title="t(`搜索（${searchHotkeyLabel()}）`, `Search (${searchHotkeyLabel()})`)" @click="ui.paletteOpen = true">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
         <button

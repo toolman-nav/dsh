@@ -378,28 +378,7 @@ code,
   background: color-mix(in srgb, var(--harness) 12%, var(--surface));
 }
 
-/* Backplane rail */
-.backplane {
-  margin: 36px 0 8px;
-  background: var(--slot);
-  color: #e8eef4;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: var(--shadow);
-}
-
-.backplane-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  padding: 16px 20px 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #9aabc0;
-}
-
+/* Featured rail */
 .rail {
   display: flex;
   flex-wrap: nowrap;
@@ -408,8 +387,10 @@ code,
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
-  padding: 8px 16px 20px;
+  padding: 4px 2px 8px;
   scroll-snap-type: x mandatory;
+  mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 28px, #000 calc(100% - 28px), transparent);
 }
 
 .rail::-webkit-scrollbar {
@@ -417,57 +398,48 @@ code,
 }
 
 .rail::-webkit-scrollbar-thumb {
-  background: #44516a;
+  background: var(--line-strong);
   border-radius: 99px;
 }
 
 .module {
   flex: 0 0 260px;
   scroll-snap-align: start;
-  background: #1a2436;
-  border: 1px solid #2a364a;
-  min-height: 148px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  min-height: 116px;
   display: grid;
-  grid-template-columns: 16px 1fr;
-  position: relative;
+  grid-template-columns: auto 1fr;
+  gap: 6px 12px;
+  padding: 14px;
+  color: var(--ink);
 }
 
-.module::before,
-.module::after {
-  content: "";
-  position: absolute;
-  left: 18px;
-  right: 10px;
-  height: 6px;
-  background-image: repeating-linear-gradient(
-    90deg,
-    #0b6e99 0 8px,
-    transparent 8px 12px
-  );
-}
-
-.module::before {
-  top: 0;
-}
-
-.module::after {
-  bottom: 0;
-}
-
-.module .slot {
+.module .mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
   background: var(--harness);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
 }
 
 .module-body {
-  padding: 16px 14px 14px 12px;
+  min-width: 0;
 }
 
 .module-body .repo {
-  color: #fbfcfd;
+  color: var(--ink);
 }
 
 .module-body p {
-  color: #9aabc0;
+  color: var(--ink-soft);
   font-size: 13px;
   margin: 6px 0 0;
 }

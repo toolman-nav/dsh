@@ -28,6 +28,17 @@ export function t(zh, en) {
   return ui.lang === "en" ? en : zh;
 }
 
+export function isApplePlatform() {
+  if (typeof navigator === "undefined") return false;
+  const platform = navigator.userAgentData?.platform || navigator.platform || "";
+  if (/Mac|iPhone|iPad|iPod/i.test(platform)) return true;
+  return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
+}
+
+export function searchHotkeyLabel() {
+  return isApplePlatform() ? "⌘K" : "Ctrl+K";
+}
+
 export function showToast(message) {
   ui.toast = message;
   clearTimeout(showToast._t);

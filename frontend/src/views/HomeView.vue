@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRouter } from "vue-router";
 import { fetchHome } from "../api.js";
-import { formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, t } from "../ui.js";
+import { formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, searchHotkeyLabel, t } from "../ui.js";
 import PluginCard from "../components/PluginCard.vue";
 
 const router = useRouter();
@@ -49,9 +49,9 @@ function search() {
       <p class="kicker">{{ t("社区目录 · 非官方", "Community catalog · unofficial") }}</p>
       <h1>{{ t("把插件插进 Harness", "Plug into Harness") }}</h1>
       <p class="lede">
-        {{ t("Bay 从 GitHub 的", "Bay collects plugins from the GitHub") }}
+        {{ t("Bay从各个地方的", "Bay collects plugins from") }}
         <code class="mono">dsh-plugin</code>
-        {{ t("话题收插件。搜到之后，复制安装命令即可。", " topic. Search, then copy the install command.") }}
+        {{ t("话题收插件。搜到之后，复制安装命令即可。", " topics in various places. Search, then copy the install command.") }}
       </p>
       <form class="search-bar search-bar-lg" @submit.prevent="search">
         <input
@@ -62,7 +62,7 @@ function search() {
         <button class="btn" type="submit">{{ t("搜索", "Search") }}</button>
       </form>
       <div class="hero-meta">
-        <p class="hint">{{ t("按 ⌘K 全局搜索", "Press ⌘K to search") }}</p>
+        <p class="hint">{{ t(`按 ${searchHotkeyLabel()} 全局搜索`, `Press ${searchHotkeyLabel()} to search`) }}</p>
         <p class="hint hero-count" v-if="home.total">
           {{ t(`已收录 ${home.total} 个插件`, `${home.total} plugins indexed`) }}
         </p>
@@ -82,22 +82,20 @@ function search() {
     <p v-if="error" class="lede">{{ error }}</p>
 
     <section class="section" v-if="home.featured.length">
-      <div class="backplane" aria-label="精选插件背板">
-        <div class="backplane-head">
-          <span>{{ t("精选模块", "Featured modules") }}</span>
-          <span>{{ t("滑动浏览", "scroll") }}</span>
-        </div>
-        <div class="rail" :class="{ 'is-auto': !reduceMotion }" :style="{ '--rail-duration': railDuration }">
-          <div class="rail-track">
-            <RouterLink v-for="(p, i) in featuredLoop" :key="`${p.id}-${i}`" class="module" :to="pluginHref(p)">
-              <span class="mark mark-sm" :style="{ '--h': pluginHue(p) }">{{ pluginInitials(p) }}</span>
-              <div class="module-copy">
-                <div class="module-title">{{ pluginTitle(p) }}</div>
-                <p>{{ plainText(p.description) }}</p>
-              </div>
-              <div class="module-meta">★ {{ formatStars(p.stars) }}</div>
-            </RouterLink>
-          </div>
+      <div class="section-head">
+        <h2>{{ t("精选模块", "Featured modules") }}</h2>
+        <RouterLink :to="{ name: 'plugins', query: { featured: '1' } }">{{ t("查看全部", "View all") }}</RouterLink>
+      </div>
+      <div class="rail" :class="{ 'is-auto': !reduceMotion }" :style="{ '--rail-duration': railDuration }" aria-label="精选插件">
+        <div class="rail-track">
+          <RouterLink v-for="(p, i) in featuredLoop" :key="`${p.id}-${i}`" class="module" :to="pluginHref(p)">
+            <span class="mark mark-sm" :style="{ '--h': pluginHue(p) }">{{ pluginInitials(p) }}</span>
+            <div class="module-copy">
+              <div class="module-title">{{ pluginTitle(p) }}</div>
+              <p>{{ plainText(p.description) }}</p>
+            </div>
+            <div class="module-meta">★ {{ formatStars(p.stars) }}</div>
+          </RouterLink>
         </div>
       </div>
     </section>

@@ -218,6 +218,12 @@
     },
   ];
 
+  const searchHotkey = /Mac|iPhone|iPad|iPod/i.test(
+    navigator.userAgentData?.platform || navigator.platform || navigator.userAgent
+  )
+    ? "⌘K"
+    : "Ctrl+K";
+
   const dict = {
     zh: {
       home: "首页",
@@ -225,7 +231,7 @@
       about: "关于",
       search: "搜索插件、功能或作者",
       searchBtn: "搜索",
-      cmdk: "按 ⌘K 全局搜索",
+      cmdk: `按 ${searchHotkey} 全局搜索`,
       copy: "复制",
       copied: "已复制安装命令",
       themeLight: "浅色",
@@ -238,7 +244,7 @@
       about: "About",
       search: "Search plugins, capabilities, or authors",
       searchBtn: "Search",
-      cmdk: "Press ⌘K to search",
+      cmdk: `Press ${searchHotkey} to search`,
       copy: "Copy",
       copied: "Install command copied",
       themeLight: "Light",
@@ -337,7 +343,7 @@
 
   const moduleHTML = (p) => `
     <a class="module" href="${p.href}">
-      <div class="slot" aria-hidden="true"></div>
+      <span class="mark mark-sm" aria-hidden="true">${p.repo.split("/")[1].slice(0, 2).toUpperCase()}</span>
       <div class="module-body">
         <div class="repo">${p.repo.split("/")[1]}</div>
         <p>${state.lang === "en" ? p.descEn : p.desc}</p>
@@ -464,13 +470,19 @@
       if (e.target === overlay) close();
     });
     input.addEventListener("input", () => render(input.value));
-    document.addEventListener("keydown", (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
-        e.preventDefault();
-        overlay.classList.contains("is-open") ? close() : open();
-      }
-      if (e.key === "Escape") close();
-    });
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        const isK = e.code === "KeyK" || (e.key || "").toLowerCase() === "k";
+        if (isK && (e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey) {
+          e.preventDefault();
+          e.stopPropagation();
+          overlay.classList.contains("is-open") ? close() : open();
+        }
+        if (e.key === "Escape") close();
+      },
+      true
+    );
   };
 
   const bindCatalog = () => {
