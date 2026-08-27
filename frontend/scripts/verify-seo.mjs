@@ -119,6 +119,13 @@ assert(!hasKeywordsMeta(aboutHtml), "About page should not inherit home keywords
 assert(!hasKeywordsMeta(notFoundHtml), "404 page should not inherit home keywords");
 assert(!hasKeywordsMeta(html), "Sample plugin page should not inherit home keywords");
 
+const page0Path = resolve(outDir, "data", "pages", "updated-0.json");
+assert(existsSync(page0Path), "Missing browse page data/pages/updated-0.json");
+const page0 = JSON.parse(readFileSync(page0Path, "utf8"));
+assert(Array.isArray(page0.content) && page0.content.length === 24, "First browse page should contain 24 plugins");
+assert(page0.totalElements === plugins.length, "Browse page totalElements should match plugin-like count");
+assert(statSync(page0Path).size < 80_000, "First browse page should stay small enough for a fast first paint");
+
 const result = {
   sample: sample.id,
   canonical,
@@ -128,5 +135,6 @@ const result = {
   llmsEntries,
   llmsFullEntries,
   catalogIndexBytes: statSync(resolve(outDir, "data", "catalog-index.json")).size,
+  browsePage0Bytes: statSync(page0Path).size,
 };
 console.log(JSON.stringify(result, null, 2));

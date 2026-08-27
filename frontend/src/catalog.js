@@ -120,6 +120,24 @@ export function catalogHome() {
   return homePromise;
 }
 
+const BROWSE_SORTS = new Set(["updated", "stars", "new"]);
+const PAGE_SIZE = 24;
+
+function canUseBrowsePage({ q, capability, kind, includeAll, sort, size }) {
+  return (
+    !String(q || "").trim() &&
+    !capability &&
+    !kind &&
+    !includeAll &&
+    BROWSE_SORTS.has(sort || "updated") &&
+    Number(size || PAGE_SIZE) === PAGE_SIZE
+  );
+}
+
+function browsePagePath(sort, featured, page) {
+  return `data/pages/${sort || "updated"}${featured ? "-featured" : ""}-${page}.json`;
+}
+
 export async function catalogSearch({
   q = "",
   capability = "",
@@ -130,13 +148,19 @@ export async function catalogSearch({
   page = 0,
   size = 24,
 } = {}) {
+  const safePage = Math.max(0, Number(page) || 0);
+  const safeSize = Math.max(1, Number(size) || PAGE_SIZE);
+  if (canUseBrowsePage({ q, capability, kind, includeAll, sort, size: safeSize })) {
+    const paged = await tryJson(browsePagePath(sort, featured, safePage));
+    if (paged && Array.isArray(paged.content)) {
+      return paged;
+    }
+  }
   const { plugins } = await loadIndex();
   const matched = sortPlugins(
     plugins.filter((plugin) => matches(plugin, { q, capability, kind, featured, includeAll })),
     sort
   );
-  const safePage = Math.max(0, Number(page) || 0);
-  const safeSize = Math.max(1, Number(size) || 24);
   const start = safePage * safeSize;
   const content = matched.slice(start, start + safeSize);
   return {

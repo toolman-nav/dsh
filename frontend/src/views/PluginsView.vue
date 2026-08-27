@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { fetchPlugins } from "../api.js";
 import { CAPABILITIES } from "../taxonomy.js";
@@ -16,7 +16,10 @@ const filtersOpen = ref(false);
 const loading = ref(true);
 const loadingMore = ref(false);
 const error = ref("");
+const sentinel = ref(null);
 const page = reactive({ content: [], totalElements: 0, number: 0, last: true });
+let loadSeq = 0;
+let observer;
 const form = reactive({
   q: "",
   capability: "",
@@ -51,7 +54,28 @@ function applyFilters() {
   router.replace({ query: queryFromForm() });
 }
 
+function canLoadMore() {
+  return !loading.value && !loadingMore.value && !page.last && page.content.length > 0;
+}
+
+function sentinelInView() {
+  const el = sentinel.value;
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  return rect.top < window.innerHeight + 240;
+}
+
+function maybeLoadMore() {
+  if (canLoadMore() && sentinelInView()) {
+    load(false);
+  }
+}
+
 async function load(reset = true) {
+  if (!reset && !canLoadMore()) {
+    return;
+  }
+  const seq = reset ? (loadSeq += 1) : loadSeq;
   if (reset) {
     loading.value = true;
   } else {
@@ -70,6 +94,9 @@ async function load(reset = true) {
       page: nextPage,
       size: 24,
     });
+    if (seq !== loadSeq) {
+      return;
+    }
     if (reset) {
       page.content = data.content || [];
     } else {
@@ -79,6 +106,9 @@ async function load(reset = true) {
     page.number = data.number ?? nextPage;
     page.last = Boolean(data.last);
   } catch {
+    if (seq !== loadSeq) {
+      return;
+    }
     error.value = t("插件数据加载失败，请刷新后重试。", "Plugin data failed to load. Refresh and try again.");
     if (reset) {
       page.content = [];
@@ -86,8 +116,13 @@ async function load(reset = true) {
       page.last = true;
     }
   } finally {
-    loading.value = false;
-    loadingMore.value = false;
+    if (seq === loadSeq) {
+      loading.value = false;
+      loadingMore.value = false;
+    }
+  }
+  if (!reset && seq === loadSeq) {
+    maybeLoadMore();
   }
 }
 
@@ -99,6 +134,25 @@ watch(
   },
   { immediate: true }
 );
+
+watch(sentinel, (el) => {
+  observer?.disconnect();
+  observer = undefined;
+  if (!el || typeof IntersectionObserver === "undefined") {
+    return;
+  }
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        maybeLoadMore();
+      }
+    },
+    { root: null, rootMargin: "240px 0px", threshold: 0 }
+  );
+  observer.observe(el);
+});
+
+onUnmounted(() => observer?.disconnect());
 </script>
 
 <template>
@@ -184,7 +238,8 @@ watch(
           <PluginCard v-for="p in page.content" :key="p.id" :plugin="p" />
         </div>
         <button
-          v-if="!page.last && page.content.length"
+          v-if="!loading && !error && page.content.length && !page.last"
+          ref="sentinel"
           class="btn btn-ghost load-more"
           type="button"
           :disabled="loadingMore"

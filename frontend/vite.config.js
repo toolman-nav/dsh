@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
+import { buildBrowsePages } from "./scripts/catalog-pages.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
 const INDEX_KEYS = [
@@ -28,6 +29,7 @@ function sliceCatalog() {
   const newest = [...plugins].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))).slice(0, 12);
   const popular = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0)).slice(0, 12);
   const featured = plugins.filter((plugin) => plugin.featured).slice(0, 12);
+  const indexPlugins = all.map((plugin) => Object.fromEntries(INDEX_KEYS.map((key) => [key, plugin[key]])));
   const meta = {
     lastCrawledAt: catalog.lastCrawledAt || "",
     total: plugins.length,
@@ -42,8 +44,9 @@ function sliceCatalog() {
       popular,
     },
     index: {
-      plugins: all.map((plugin) => Object.fromEntries(INDEX_KEYS.map((key) => [key, plugin[key]]))),
+      plugins: indexPlugins,
     },
+    pages: buildBrowsePages(indexPlugins),
   };
 }
 
@@ -65,6 +68,21 @@ function catalogDevPages() {
       if (url === "/data/home.json") return sendJson(res, load().home);
       if (url === "/data/meta.json") return sendJson(res, load().meta);
       if (url === "/data/catalog-index.json") return sendJson(res, load().index);
+      const pageMatch = url.match(/^\/data\/pages\/((?:updated|stars|new)(?:-featured)?)-(\d+)\.json$/);
+      if (pageMatch) {
+        const pages = load().pages[pageMatch[1]] || [];
+        const number = Number(pageMatch[2]);
+        return sendJson(
+          res,
+          pages[number] || {
+            content: [],
+            totalElements: pages[0]?.totalElements || 0,
+            number,
+            size: 24,
+            last: true,
+          }
+        );
+      }
     } catch (error) {
       return next(error);
     }

@@ -3,6 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizePlugin } from "../src/taxonomy.js";
 import { HOME_DESCRIPTION, HOME_HEADING, HOME_KEYWORDS, HOME_TITLE, homeDescription } from "../src/seo.js";
+import { buildBrowsePages } from "./catalog-pages.mjs";
 
 const SITE_URL = String(process.env.SITE_URL || "https://dshpluginlist.com").replace(/\/$/, "");
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -200,6 +201,13 @@ const catalogIndex = allPlugins.map((plugin) => Object.fromEntries(indexKeys.map
 writeFileSync(resolve(dataDir, "meta.json"), JSON.stringify(meta));
 writeFileSync(resolve(dataDir, "home.json"), JSON.stringify(home));
 writeFileSync(resolve(dataDir, "catalog-index.json"), JSON.stringify({ plugins: catalogIndex }));
+const pagesDir = resolve(dataDir, "pages");
+mkdirSync(pagesDir, { recursive: true });
+for (const [key, pages] of Object.entries(buildBrowsePages(catalogIndex))) {
+  for (const page of pages) {
+    writeFileSync(resolve(pagesDir, `${key}-${page.number}.json`), JSON.stringify(page));
+  }
+}
 
 for (const plugin of allPlugins) {
   const path = pluginPath(plugin);
