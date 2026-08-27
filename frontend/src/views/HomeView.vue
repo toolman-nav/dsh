@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { RouterLink, useRouter } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import { fetchHome } from "../api.js";
+import { HOME_HEADING, setHomeSeo } from "../seo.js";
 import { formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, searchHotkeyLabel, t } from "../ui.js";
 import PluginCard from "../components/PluginCard.vue";
 
+const route = useRoute();
 const router = useRouter();
 const emit = defineEmits(["crawled"]);
 const q = ref("");
@@ -30,6 +32,11 @@ const railDuration = computed(() => {
 onMounted(async () => {
   try {
     home.value = await fetchHome();
+    if (route.name === "home") {
+      setHomeSeo(home.value.total, {
+        robots: Object.keys(route.query || {}).length > 0 ? "noindex,follow" : undefined,
+      });
+    }
     emit("crawled", formatDate(home.value.lastCrawledAt));
   } catch {
     error.value = t("首页数据加载失败，请刷新后重试。", "Home data failed to load. Refresh and try again.");
@@ -47,9 +54,9 @@ function search() {
   <main id="main" class="wrap home">
     <section class="hero">
       <p class="kicker">{{ t("社区目录 · 非官方", "Community catalog · unofficial") }}</p>
-      <h1>{{ t("把插件插进 Harness", "Plug into Harness") }}</h1>
+      <h1>{{ t(HOME_HEADING, "DeepSeek Harness plugin catalog") }}</h1>
       <p class="lede">
-        {{ t("Bay从各个地方的", "Bay collects plugins from") }}
+        {{ t("把插件插进 Harness。Bay从各个地方的", "Plug into Harness. Bay collects plugins from") }}
         <code class="mono">dsh-plugin</code>
         {{ t("话题收插件。搜到之后，复制安装命令即可。", " topics in various places. Search, then copy the install command.") }}
       </p>

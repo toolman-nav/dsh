@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizePlugin } from "../src/taxonomy.js";
+import { HOME_DESCRIPTION, HOME_HEADING, HOME_KEYWORDS, HOME_TITLE, homeDescription } from "../src/seo.js";
 
 const SITE_URL = String(process.env.SITE_URL || "https://dshpluginlist.com").replace(/\/$/, "");
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -73,12 +74,15 @@ function safeJson(value) {
   return JSON.stringify(value).replaceAll("<", "\\u003c");
 }
 
+const KEYWORDS_TAG_RE = /<meta\b(?=[^>]*\bname\s*=\s*(["'])keywords\1)[^>]*>\s*/i;
+
 function replaceTag(html, pattern, replacement) {
-  if (pattern.test(html)) return html.replace(pattern, replacement);
+  const re = pattern instanceof RegExp ? new RegExp(pattern.source, pattern.flags.replace("g", "")) : pattern;
+  if (re.test(html)) return html.replace(re, replacement);
   return html.replace("</head>", `    ${replacement}\n  </head>`);
 }
 
-function applySeo(html, { title, description, path, robots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1", type = "website", schema }) {
+function applySeo(html, { title, description, keywords, path, robots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1", type = "website", schema }) {
   const url = canonical(path);
   const image = `${SITE_URL}/logo.png`;
   let next = html.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
@@ -96,7 +100,11 @@ function applySeo(html, { title, description, path, robots = "index,follow,max-i
     [/<meta[^>]+name="twitter:image"[^>]*>/i, `<meta name="twitter:image" content="${image}" />`],
     [/<script[^>]+id="seo-jsonld"[^>]*>[\s\S]*?<\/script>/i, `<script id="seo-jsonld" type="application/ld+json">${safeJson(schema)}</script>`],
   ];
+  if (keywords) {
+    tags.splice(1, 0, [KEYWORDS_TAG_RE, `<meta name="keywords" content="${escapeHtml(keywords)}" />`]);
+  }
   for (const [pattern, replacement] of tags) next = replaceTag(next, pattern, replacement);
+  if (!keywords) next = next.replace(/<meta\b(?=[^>]*\bname\s*=\s*(["'])keywords\1)[^>]*>\s*/gi, "");
   return next;
 }
 
@@ -120,13 +128,13 @@ function listItems(items) {
   }).join("")}</ul>`;
 }
 
-function websiteSchema() {
+function websiteSchema(description = HOME_DESCRIPTION) {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Bay · DSH 插件仓",
     url: `${SITE_URL}/`,
-    description: "DeepSeek Harness 社区插件目录。",
+    description,
     inLanguage: ["zh-CN", "en"],
     potentialAction: {
       "@type": "SearchAction",
@@ -140,9 +148,15 @@ const byStars = [...plugins].sort((a, b) => (b.stars || 0) - (a.stars || 0));
 const byUpdated = [...plugins].sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")));
 const featured = byStars.filter((plugin) => plugin.featured).slice(0, 12);
 const homeItems = [...new Map([...featured, ...byUpdated.slice(0, 12), ...byStars.slice(0, 12)].map((plugin) => [plugin.id, plugin])).values()];
-const homeDescription = `Bay 已收录 ${plugins.length} 个 DeepSeek Harness 社区插件，提供搜索、分类、安装命令与 GitHub 源码信息。`;
-let homeHtml = applySeo(template, { title: "Bay · DSH 插件仓｜DeepSeek Harness 社区插件目录", description: homeDescription, path: "/", schema: websiteSchema() });
-homeHtml = injectFallback(homeHtml, `<main id="main" class="wrap home"><section class="hero panel"><h1>DSH 插件仓</h1><p>${escapeHtml(homeDescription)}</p><p>目录更新：<time datetime="${escapeHtml(catalog.lastCrawledAt || "")}">${escapeHtml(catalog.lastCrawledAt || "未知")}</time></p><p><a href="/plugins/">浏览全部插件</a> · <a href="/about/">收录规则与安全说明</a></p></section><section><h2>精选与近期更新</h2>${listItems(homeItems)}</section></main>`);
+const homeSeoDescription = homeDescription(plugins.length);
+let homeHtml = applySeo(template, {
+  title: HOME_TITLE,
+  description: homeSeoDescription,
+  keywords: HOME_KEYWORDS,
+  path: "/",
+  schema: websiteSchema(homeSeoDescription),
+});
+homeHtml = injectFallback(homeHtml, `<main id="main" class="wrap home"><section class="hero panel"><h1>${escapeHtml(HOME_HEADING)}</h1><p>${escapeHtml(homeSeoDescription)}</p><p>目录更新：<time datetime="${escapeHtml(catalog.lastCrawledAt || "")}">${escapeHtml(catalog.lastCrawledAt || "未知")}</time></p><p><a href="/plugins/">浏览全部插件</a> · <a href="/about/">收录规则与安全说明</a></p></section><section><h2>精选与近期更新</h2>${listItems(homeItems)}</section></main>`);
 writePage("", homeHtml);
 
 const collectionSchema = {
@@ -236,7 +250,7 @@ writeFileSync(resolve(outDir, "sitemap.xml"), sitemap);
 const robots = `User-agent: *\nAllow: /\nDisallow: /api/admin/\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: ChatGPT-User\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;
 writeFileSync(resolve(outDir, "robots.txt"), robots);
 
-const llmsHeader = `# Bay · DSH 插件仓\n\n> DeepSeek Harness 非官方社区插件目录。提供插件搜索、分类、安装命令、GitHub 源码和更新时间。\n\n- 网站：${SITE_URL}/\n- 插件目录：${SITE_URL}/plugins/\n- 关于与安全说明：${SITE_URL}/about/\n- Sitemap：${SITE_URL}/sitemap.xml\n- 数据更新时间：${catalog.lastCrawledAt || "未知"}\n\n## 推荐与热门插件\n`;
+const llmsHeader = `# ${HOME_HEADING}\n\n> ${HOME_DESCRIPTION}\n\n- 网站：${SITE_URL}/\n- 插件目录：${SITE_URL}/plugins/\n- 关于与安全说明：${SITE_URL}/about/\n- Sitemap：${SITE_URL}/sitemap.xml\n- 数据更新时间：${catalog.lastCrawledAt || "未知"}\n\n## 推荐与热门插件\n`;
 const llmsRows = byStars.slice(0, 100).map((plugin) => `- [${plugin.id}](${canonical(pluginPath(plugin))}): ${excerpt(plugin.description, "暂无描述", 240)}`).join("\n");
 const llmsFullRows = plugins.map((plugin) => `- [${plugin.id}](${canonical(pluginPath(plugin))}): ${excerpt(plugin.description, "暂无描述", 320)}`).join("\n");
 writeFileSync(resolve(outDir, "llms.txt"), `${llmsHeader}${llmsRows}\n`);

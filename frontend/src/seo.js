@@ -1,8 +1,33 @@
 const SITE_NAME = "Bay · DSH 插件仓";
-const DEFAULT_DESCRIPTION = "Bay 收录 DeepSeek Harness 社区插件，提供可搜索的插件目录、安装命令、GitHub 仓库信息与更新时间。";
 const DEFAULT_SITE_URL = "https://dshpluginlist.com";
 
-export const SITE_URL = String(import.meta.env.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, "");
+export const HOME_HEADING = "DeepSeek Harness 插件目录";
+export const HOME_TITLE = `${HOME_HEADING}｜Bay DSH 插件仓`;
+export const HOME_KEYWORDS = "DeepSeek Harness插件,DSH插件,dsh-plugin,Harness插件目录,DeepSeek插件安装,Bay插件仓";
+const HOME_DESCRIPTION_TAIL = "搜索 dsh-plugin 话题仓库，按能力分类浏览，复制安装命令并查看 GitHub 源码。";
+export const HOME_DESCRIPTION = `Bay 是 DeepSeek Harness（DSH）非官方社区插件目录。${HOME_DESCRIPTION_TAIL}`;
+const DEFAULT_DESCRIPTION = HOME_DESCRIPTION;
+const COUNTED_HOME_DESCRIPTION_RE = /已收录\s+(\d+)\s+个/;
+
+export function homeDescription(total) {
+  const count = Number(total);
+  if (!Number.isFinite(count) || count <= 0) {
+    return HOME_DESCRIPTION;
+  }
+  return `Bay 已收录 ${count} 个 DeepSeek Harness（DSH）非官方社区插件。${HOME_DESCRIPTION_TAIL}`;
+}
+
+function readMetaDescription() {
+  if (typeof document === "undefined") return "";
+  return document.head.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+}
+
+function countedHomeTotal(description = readMetaDescription()) {
+  const matched = String(description).match(COUNTED_HOME_DESCRIPTION_RE);
+  return matched ? Number(matched[1]) : 0;
+}
+
+export const SITE_URL = String(import.meta.env?.VITE_SITE_URL || DEFAULT_SITE_URL).replace(/\/$/, "");
 
 function absoluteUrl(path = "/") {
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -47,6 +72,7 @@ function setJsonLd(value) {
 export function setSeo({
   title = SITE_NAME,
   description = DEFAULT_DESCRIPTION,
+  keywords,
   path = "/",
   robots = "index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1",
   type = "website",
@@ -59,6 +85,11 @@ export function setSeo({
   document.title = title;
   setCanonical(canonical);
   setMeta('meta[name="description"]', { name: "description", content: description });
+  if (keywords) {
+    setMeta('meta[name="keywords"]', { name: "keywords", content: keywords });
+  } else {
+    document.head.querySelector('meta[name="keywords"]')?.remove();
+  }
   setMeta('meta[name="robots"]', { name: "robots", content: robots });
   setMeta('meta[property="og:site_name"]', { property: "og:site_name", content: SITE_NAME });
   setMeta('meta[property="og:title"]', { property: "og:title", content: title });
@@ -74,13 +105,13 @@ export function setSeo({
   setJsonLd(jsonLd || websiteJsonLd());
 }
 
-export function websiteJsonLd() {
+export function websiteJsonLd(description = DEFAULT_DESCRIPTION) {
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: SITE_NAME,
     url: `${SITE_URL}/`,
-    description: DEFAULT_DESCRIPTION,
+    description,
     inLanguage: ["zh-CN", "en"],
     potentialAction: {
       "@type": "SearchAction",
@@ -88,6 +119,18 @@ export function websiteJsonLd() {
       "query-input": "required name=search_term_string",
     },
   };
+}
+
+export function setHomeSeo(total, extra = {}) {
+  const description = homeDescription(total);
+  setSeo({
+    title: HOME_TITLE,
+    description,
+    keywords: HOME_KEYWORDS,
+    path: "/",
+    jsonLd: websiteJsonLd(description),
+    ...extra,
+  });
 }
 
 export function collectionJsonLd() {
@@ -133,9 +176,14 @@ export function routeSeo(route) {
     : hasQuery
       ? "noindex,follow"
       : undefined;
+  if (route.name === "home") {
+    setHomeSeo(countedHomeTotal(), { robots });
+    return;
+  }
   setSeo({
     title: route.meta?.title,
     description: route.meta?.description,
+    keywords: route.meta?.keywords,
     path: route.meta?.canonicalPath || route.path,
     robots,
     jsonLd: route.name === "plugins" ? collectionJsonLd() : websiteJsonLd(),

@@ -4,7 +4,7 @@ import PluginsView from "./views/PluginsView.vue";
 import PluginDetailView from "./views/PluginDetailView.vue";
 import AboutView from "./views/AboutView.vue";
 import NotFoundView from "./views/NotFoundView.vue";
-import { routeSeo } from "./seo.js";
+import { HOME_DESCRIPTION, HOME_KEYWORDS, HOME_TITLE, routeSeo } from "./seo.js";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,8 +14,9 @@ const router = createRouter({
       name: "home",
       component: HomeView,
       meta: {
-        title: "Bay · DSH 插件仓｜DeepSeek Harness 社区插件目录",
-        description: "发现、搜索和安装 DeepSeek Harness 社区插件，查看 GitHub 仓库、插件能力、安装命令与更新时间。",
+        title: HOME_TITLE,
+        description: HOME_DESCRIPTION,
+        keywords: HOME_KEYWORDS,
         canonicalPath: "/",
       },
     },
