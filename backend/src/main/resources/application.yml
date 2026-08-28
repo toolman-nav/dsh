@@ -27,7 +27,7 @@ bay:
     url: ${BAY_REGISTRY_URL:https://awesome-dsh-plugin.com/plugins.json}
   crawl:
     cron: "0 0 * * * *"
-    readme-limit: ${BAY_README_LIMIT:60}
+    readme-limit: ${BAY_README_LIMIT:100}
     stale-days: ${BAY_STALE_DAYS:7}
 
 logging:

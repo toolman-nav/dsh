@@ -1,4 +1,5 @@
 import { reactive } from "vue";
+import { CAPABILITY_EN, KIND_EN } from "./taxonomy.js";
 
 export const ui = reactive({
   theme: localStorage.getItem("bay-theme") || "light",
@@ -26,6 +27,16 @@ export function toggleLang() {
 
 export function t(zh, en) {
   return ui.lang === "en" ? en : zh;
+}
+
+export function capabilityLabel(value) {
+  const zh = String(value || "");
+  return t(zh, CAPABILITY_EN[zh] || zh);
+}
+
+export function kindLabel(value) {
+  const zh = String(value || "");
+  return t(zh, KIND_EN[zh] || zh);
 }
 
 export function isApplePlatform() {

@@ -2,12 +2,11 @@
 import { onUnmounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { fetchPlugins } from "../api.js";
-import { CAPABILITIES } from "../taxonomy.js";
-import { t } from "../ui.js";
+import { CAPABILITIES, KINDS } from "../taxonomy.js";
+import { capabilityLabel, kindLabel, t } from "../ui.js";
 import PluginCard from "../components/PluginCard.vue";
 
 const CAPS = CAPABILITIES;
-const KINDS = ["工具", "服务", "客户端 UI", "工作流", "主题"];
 
 const route = useRoute();
 const router = useRouter();
@@ -176,7 +175,7 @@ onUnmounted(() => observer?.disconnect());
           <div class="filter-list">
             <label v-for="cap in CAPS" :key="cap">
               <input type="radio" name="cap" :value="cap" v-model="form.capability" @change="applyFilters" />
-              {{ cap }}
+              {{ capabilityLabel(cap) }}
             </label>
             <label>
               <input type="radio" name="cap" value="" v-model="form.capability" @change="applyFilters" />
@@ -189,7 +188,7 @@ onUnmounted(() => observer?.disconnect());
           <div class="filter-list">
             <label v-for="kind in KINDS" :key="kind">
               <input type="radio" name="kind" :value="kind" v-model="form.kind" @change="applyFilters" />
-              {{ kind }}
+              {{ kindLabel(kind) }}
             </label>
             <label>
               <input type="radio" name="kind" value="" v-model="form.kind" @change="applyFilters" />
@@ -229,8 +228,8 @@ onUnmounted(() => observer?.disconnect());
         <div class="active-chips">
           <span v-if="form.featured" class="chip is-on">{{ t("精选", "Featured") }}</span>
           <span v-if="form.includeAll" class="chip is-on">{{ t("全部话题", "All topics") }}</span>
-          <span v-if="form.capability" class="chip is-on">{{ form.capability }}</span>
-          <span v-if="form.kind" class="chip is-on">{{ form.kind }}</span>
+          <span v-if="form.capability" class="chip is-on">{{ capabilityLabel(form.capability) }}</span>
+          <span v-if="form.kind" class="chip is-on">{{ kindLabel(form.kind) }}</span>
         </div>
         <p v-if="loading" class="status">{{ t("加载中…", "Loading…") }}</p>
         <p v-else-if="error" class="status">{{ error }}</p>

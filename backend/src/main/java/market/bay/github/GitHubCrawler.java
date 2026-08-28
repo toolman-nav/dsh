@@ -52,7 +52,7 @@ public class GitHubCrawler {
             CrawlMetaRepository crawlMetaRepository,
             @Value("${bay.github.topic}") String topic,
             @Value("${bay.github.max-pages}") int maxPages,
-            @Value("${bay.crawl.readme-limit:60}") int readmeLimit,
+            @Value("${bay.crawl.readme-limit:100}") int readmeLimit,
             @Value("${bay.crawl.stale-days:7}") int staleDays
     ) {
         this.gitHubClient = gitHubClient;

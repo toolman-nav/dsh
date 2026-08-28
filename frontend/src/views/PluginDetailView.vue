@@ -4,7 +4,7 @@ import { RouterLink, useRoute } from "vue-router";
 import { fetchPlugin, hydrateReadme } from "../api.js";
 import { renderReadme } from "../readme.js";
 import { pluginJsonLd, setSeo } from "../seo.js";
-import { copyText, formatDate, formatStars, pickReadme, pluginFullLabel, pluginHue, pluginInitials, plainText, t, ui } from "../ui.js";
+import { copyText, formatDate, formatStars, pickReadme, pluginFullLabel, pluginHue, pluginInitials, plainText, capabilityLabel, kindLabel, t, ui } from "../ui.js";
 
 const route = useRoute();
 const plugin = ref(null);
@@ -121,7 +121,7 @@ async function copyInstall(event) {
       ></section>
       <section v-show="tab === 'overview'" class="readme">
         <h2>{{ t("概览", "Overview") }}</h2>
-        <p>{{ t("类型", "Type") }}：{{ plugin.kind }} · {{ t("能力", "Capability") }}：{{ plugin.capability }} · Star {{ formatStars(plugin.stars) }}</p>
+        <p>{{ t("类型", "Type") }}：{{ kindLabel(plugin.kind) }} · {{ t("能力", "Capability") }}：{{ capabilityLabel(plugin.capability) }} · Star {{ formatStars(plugin.stars) }}</p>
         <p>{{ t("语言", "Language") }}：{{ plugin.language || "—" }} · {{ t("协议", "License") }}：{{ plugin.license || "—" }}</p>
       </section>
     </article>

@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { fetchHome } from "../api.js";
 import { HOME_HEADING, setHomeSeo } from "../seo.js";
-import { formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, searchHotkeyLabel, t } from "../ui.js";
+import { formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, searchHotkeyLabel, capabilityLabel, t } from "../ui.js";
 import PluginCard from "../components/PluginCard.vue";
 
 const route = useRoute();
@@ -75,12 +75,12 @@ function search() {
         </p>
       </div>
       <div class="chips">
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '开发运行时' } }">{{ t("开发运行时", "Dev runtime") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '浏览器 / Web' } }">{{ t("浏览器 / Web", "Browser / Web") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '工具与能力' } }">{{ t("工具与能力", "Tools") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '主题外观' } }">{{ t("主题外观", "Themes") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '视觉与多模态' } }">{{ t("视觉与多模态", "Vision") }}</RouterLink>
-        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '界面增强' } }">{{ t("界面增强", "UI enhancements") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '开发运行时' } }">{{ capabilityLabel("开发运行时") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '浏览器 / Web' } }">{{ capabilityLabel("浏览器 / Web") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '工具与能力' } }">{{ capabilityLabel("工具与能力") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '主题外观' } }">{{ capabilityLabel("主题外观") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '视觉与多模态' } }">{{ capabilityLabel("视觉与多模态") }}</RouterLink>
+        <RouterLink class="chip" :to="{ name: 'plugins', query: { capability: '界面增强' } }">{{ capabilityLabel("界面增强") }}</RouterLink>
         <RouterLink class="chip chip-more" to="/plugins/">{{ t("全部插件", "All plugins") }}</RouterLink>
       </div>
     </section>

@@ -21,6 +21,39 @@ export const CAPABILITIES = Object.freeze([
   "文档与渲染",
 ]);
 
+export const KINDS = Object.freeze(["工具", "服务", "客户端 UI", "工作流", "主题"]);
+
+export const CAPABILITY_EN = Object.freeze({
+  界面增强: "UI enhancements",
+  工具与能力: "Tools & capabilities",
+  开发运行时: "Dev runtime",
+  会话与消息: "Sessions & messages",
+  工作流: "Workflows",
+  用量与计费: "Usage & billing",
+  记忆: "Memory",
+  通知与集成: "Notifications & integrations",
+  主题外观: "Themes",
+  视觉与多模态: "Vision & multimodal",
+  娱乐: "Fun",
+  Skills: "Skills",
+  安全与权限: "Security & permissions",
+  插件市场: "Plugin market",
+  模型与供应商: "Models & providers",
+  "Git / GitHub": "Git / GitHub",
+  "浏览器 / Web": "Browser / Web",
+  远程与移动: "Remote & mobile",
+  语音: "Voice",
+  文档与渲染: "Docs & rendering",
+});
+
+export const KIND_EN = Object.freeze({
+  工具: "Tool",
+  服务: "Service",
+  "客户端 UI": "Client UI",
+  工作流: "Workflow",
+  主题: "Theme",
+});
+
 const LEGACY_CAPABILITIES = Object.freeze({
   "开发": "开发运行时",
   "搜索": "工具与能力",

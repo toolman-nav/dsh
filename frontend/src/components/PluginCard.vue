@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { copyText, formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, t } from "../ui.js";
+import { copyText, formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, capabilityLabel, kindLabel, t } from "../ui.js";
 
 const props = defineProps({
   plugin: { type: Object, required: true },
@@ -38,8 +38,8 @@ async function copyCmd(event) {
       </div>
       <p>{{ plainText(plugin.description) || t("暂无描述。", "No description.") }}</p>
       <div class="card-tags" v-if="plugin.capability || plugin.kind">
-        <span v-if="plugin.capability" class="tag">{{ plugin.capability }}</span>
-        <span v-if="plugin.kind" class="tag">{{ plugin.kind }}</span>
+        <span v-if="plugin.capability" class="tag">{{ capabilityLabel(plugin.capability) }}</span>
+        <span v-if="plugin.kind" class="tag">{{ kindLabel(plugin.kind) }}</span>
       </div>
       <div class="cmd">
         <code>{{ plugin.installCommand }}</code>
