@@ -5,6 +5,7 @@ import market.bay.meta.CrawlMetaRepository;
 import market.bay.plugin.Plugin;
 import market.bay.plugin.PluginClassifier;
 import market.bay.plugin.PluginIds;
+import market.bay.plugin.InstallCommands;
 import market.bay.plugin.PluginRepository;
 import market.bay.plugin.ReadmeLocales;
 import market.bay.registry.AwesomeCatalog;
@@ -136,6 +137,10 @@ public class GitHubCrawler {
                 continue;
             }
             String githubFullName = GithubRefs.fullName(entry.url());
+            if (githubFullName == null) {
+                log.warn("Ignored registry entry with a non-GitHub URL: {}/{}", entry.owner(), entry.name());
+                continue;
+            }
             if (PluginClassifier.harnessCore(githubFullName)) {
                 continue;
             }
@@ -148,8 +153,11 @@ public class GitHubCrawler {
             plugin.setGithubFullName(githubFullName);
             plugin.setRegistryListed(true);
             plugin.setRegistryLastSeenAt(now);
-            if (entry.install() != null && !entry.install().isBlank()) {
-                plugin.setInstallLine(entry.install().trim());
+            String installCommand = InstallCommands.trusted(entry.install());
+            if (installCommand != null) {
+                plugin.setInstallLine(installCommand);
+            } else if (entry.install() != null && !entry.install().isBlank()) {
+                log.warn("Ignored unsafe install command from registry entry {}", id);
             }
             String description = entry.textDescription();
             if (description != null) {
@@ -219,20 +227,22 @@ public class GitHubCrawler {
             return;
         }
         int fetched = 0;
+        int attempted = 0;
         int pending = 0;
         for (Plugin plugin : pluginRepository.findAll()) {
             if (!needsReadmeRefresh(plugin)) {
                 continue;
             }
-            if (fetched >= readmeLimit) {
+            if (attempted >= readmeLimit) {
                 pending++;
                 continue;
             }
+            attempted++;
             if (fillReadmes(plugin, now)) {
                 fetched++;
             }
         }
-        log.info("Fetched README locales for {} plugins (limit {}), {} still pending", fetched, readmeLimit, pending);
+        log.info("Fetched README locales for {} of {} attempted plugins (limit {}), {} still pending", fetched, attempted, readmeLimit, pending);
     }
 
     private boolean fillReadmes(Plugin plugin, Instant now) {
@@ -243,7 +253,8 @@ public class GitHubCrawler {
             if (owner == null || name == null || name.isBlank()) {
                 return false;
             }
-            Map<String, String> locales = gitHubClient.fetchReadmeLocales(owner, name);
+            String basePath = GithubRefs.subpath(plugin.getHtmlUrl(), plugin.getDefaultBranch());
+            Map<String, String> locales = gitHubClient.fetchReadmeLocales(owner, name, basePath);
             if (locales.isEmpty()) {
                 plugin.setReadmeFetchedAt(now);
                 pluginRepository.save(plugin);

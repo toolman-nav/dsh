@@ -1,5 +1,6 @@
 import DOMPurify from "dompurify";
 import { Marked } from "marked";
+import { githubBlobToRaw, rawGithubUrl } from "./github.js";
 import { t } from "./ui.js";
 
 const AWESOME_BADGE = String.raw`https?:\/\/(?:www\.)?awesome-dsh-plugin\.com\/badge\.svg[^)\s"']*`;
@@ -12,14 +13,6 @@ function escapeAttr(value) {
     .replaceAll("\"", "&quot;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-}
-
-function githubBlobToRaw(url) {
-  const match = url.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/(?:blob|raw)\/([^/]+)\/(.+)$/);
-  if (!match) {
-    return url;
-  }
-  return `https://raw.githubusercontent.com/${match[1]}/${match[2]}/${match[3]}/${match[4]}`;
 }
 
 function rewriteHref(href, plugin) {
@@ -35,43 +28,7 @@ function rewriteHref(href, plugin) {
   ) {
     return githubBlobToRaw(href);
   }
-  const repo = githubRepo(plugin);
-  const path = resolveRepoPath(href, repo.basePath);
-  const branch = plugin.defaultBranch || repo.branch || "main";
-  return `https://raw.githubusercontent.com/${repo.owner}/${repo.name}/${branch}/${path}`;
-}
-
-function githubRepo(plugin) {
-  const url = String(plugin.htmlUrl || "");
-  const tree = url.match(/github\.com\/([^/]+)\/([^/#?]+)\/(?:tree|blob)\/([^/]+)/i);
-  if (tree) {
-    return { owner: tree[1], name: tree[2], branch: tree[3], basePath: "" };
-  }
-  const match = url.match(/github\.com\/([^/]+)\/([^/#?]+)/i);
-  if (match) {
-    return { owner: match[1], name: match[2], branch: plugin.defaultBranch || "main", basePath: "" };
-  }
-  const name = String(plugin.name || "").split("#")[0];
-  return { owner: plugin.owner, name, branch: plugin.defaultBranch || "main", basePath: "" };
-}
-
-function resolveRepoPath(href, basePath) {
-  const trimmed = String(href || "").trim();
-  if (trimmed.startsWith("/")) {
-    return trimmed.replace(/^\/+/, "");
-  }
-  const stack = basePath ? basePath.split("/").filter(Boolean) : [];
-  for (const part of trimmed.replace(/^\.\//, "").split("/")) {
-    if (!part || part === ".") {
-      continue;
-    }
-    if (part === "..") {
-      stack.pop();
-      continue;
-    }
-    stack.push(part);
-  }
-  return stack.join("/");
+  return rawGithubUrl(plugin, href);
 }
 
 function fencedCodeHtml(text, lang, escaped) {

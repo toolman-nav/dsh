@@ -60,10 +60,15 @@ public class GitHubClient {
     }
 
     public Map<String, String> fetchReadmeLocales(String owner, String repo) {
+        return fetchReadmeLocales(owner, repo, "");
+    }
+
+    public Map<String, String> fetchReadmeLocales(String owner, String repo, String basePath) {
         Map<String, String> locales = new LinkedHashMap<>();
         List<GitHubContentItem> files = new ArrayList<>();
         GitHubContentItem docs = null;
-        for (GitHubContentItem item : listContents(owner, repo, "")) {
+        String root = normalizePath(basePath);
+        for (GitHubContentItem item : listContents(owner, repo, root)) {
             if ("dir".equals(item.type()) && "docs".equalsIgnoreCase(item.name())) {
                 docs = item;
             } else if (isReadmeFile(item)) {
@@ -78,6 +83,9 @@ public class GitHubClient {
             }
         }
         if (files.isEmpty()) {
+            if (!root.isBlank()) {
+                return fetchReadmeLocales(owner, repo, "");
+            }
             String fallback = fetchDefaultReadme(owner, repo);
             if (fallback != null && !fallback.isBlank()) {
                 locales.put("default", fallback);
@@ -99,10 +107,11 @@ public class GitHubClient {
         try {
             GitHubContentItem[] items = restClient.get()
                     .uri(uri -> {
-                        if (path == null || path.isBlank()) {
-                            return uri.path("/repos/{owner}/{repo}/contents").build(owner, repo);
+                        uri.pathSegment("repos", owner, repo, "contents");
+                        for (String segment : normalizePath(path).split("/")) {
+                            if (!segment.isBlank()) uri.pathSegment(segment);
                         }
-                        return uri.path("/repos/{owner}/{repo}/contents/{path}").build(owner, repo, path);
+                        return uri.build();
                     })
                     .retrieve()
                     .body(GitHubContentItem[].class);
@@ -115,7 +124,13 @@ public class GitHubClient {
     private String fetchRawFile(String owner, String repo, String path) {
         try {
             return restClient.get()
-                    .uri(uri -> uri.path("/repos/{owner}/{repo}/contents/{path}").build(owner, repo, path))
+                    .uri(uri -> {
+                        uri.pathSegment("repos", owner, repo, "contents");
+                        for (String segment : normalizePath(path).split("/")) {
+                            if (!segment.isBlank()) uri.pathSegment(segment);
+                        }
+                        return uri.build();
+                    })
                     .accept(GITHUB_RAW)
                     .retrieve()
                     .body(String.class);
@@ -138,5 +153,9 @@ public class GitHubClient {
 
     private static boolean isReadmeFile(GitHubContentItem item) {
         return item != null && "file".equals(item.type()) && ReadmeNames.isReadmeFile(item.name());
+    }
+
+    private static String normalizePath(String path) {
+        return String.valueOf(path == null ? "" : path).replace('\\', '/').replaceAll("^/+|/+$", "");
     }
 }

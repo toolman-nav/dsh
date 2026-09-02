@@ -71,6 +71,13 @@ const pageCount = countPluginPages();
 
 assert(sitemapUrls === plugins.length + 3, `Sitemap URL count mismatch: ${sitemapUrls}`);
 assert(sitemap.includes(canonical), "Sitemap is missing the sample canonical URL");
+const sampleLastmod = String(sample.updatedAt || "").match(/^\d{4}-\d{2}-\d{2}/)?.[0] || "";
+if (sampleLastmod) {
+  assert(
+    sitemap.includes(`<loc>${canonical}</loc><lastmod>${sampleLastmod}</lastmod>`),
+    "Sitemap sample lastmod does not match the plugin update date"
+  );
+}
 assert(robots.includes("Sitemap: https://dshpluginlist.com/sitemap.xml"), "robots.txt is missing the sitemap directive");
 assert(robots.includes("User-agent: OAI-SearchBot"), "robots.txt is missing OAI-SearchBot");
 assert(llmsEntries === Math.min(100, plugins.length), "llms.txt entry count mismatch");

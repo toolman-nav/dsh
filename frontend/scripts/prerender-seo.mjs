@@ -250,9 +250,18 @@ for (const plugin of allPlugins) {
   writeFileSync(dataFile, JSON.stringify(plugin));
 }
 
-const lastmod = String(catalog.lastCrawledAt || "").slice(0, 10);
-const sitemapEntries = ["/", "/plugins/", "/about/", ...plugins.map(pluginPath)];
-const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries.map((path) => `  <url><loc>${escapeHtml(canonical(path))}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`).join("\n")}\n</urlset>\n`;
+function dateOnly(value) {
+  return String(value || "").match(/^\d{4}-\d{2}-\d{2}/)?.[0] || "";
+}
+
+const catalogLastmod = dateOnly(catalog.lastCrawledAt);
+const sitemapEntries = [
+  { path: "/", lastmod: catalogLastmod },
+  { path: "/plugins/", lastmod: catalogLastmod },
+  { path: "/about/", lastmod: "" },
+  ...plugins.map((plugin) => ({ path: pluginPath(plugin), lastmod: dateOnly(plugin.updatedAt) })),
+];
+const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapEntries.map(({ path, lastmod }) => `  <url><loc>${escapeHtml(canonical(path))}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ""}</url>`).join("\n")}\n</urlset>\n`;
 writeFileSync(resolve(outDir, "sitemap.xml"), sitemap);
 
 const robots = `User-agent: *\nAllow: /\nDisallow: /api/admin/\n\nUser-agent: OAI-SearchBot\nAllow: /\n\nUser-agent: ChatGPT-User\nAllow: /\n\nUser-agent: ClaudeBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nSitemap: ${SITE_URL}/sitemap.xml\n`;

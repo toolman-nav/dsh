@@ -5,6 +5,9 @@
     "setup": "npm --prefix frontend clean-install --progress=false",
     "build": "npm run setup && npm --prefix frontend run build",
     "verify:seo": "npm --prefix frontend run verify:seo",
-    "deploy": "npx wrangler deploy"
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.125.0"
   }
 }

@@ -1,4 +1,5 @@
 import { catalogDetail, catalogHome, catalogMeta, catalogSearch } from "./catalog.js";
+import { githubRepo, rawGithubUrl } from "./github.js";
 import { normalizePlugin } from "./taxonomy.js";
 
 const API = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
@@ -99,16 +100,6 @@ export async function fetchPlugin(owner, name) {
   return normalizePlugin(plugin);
 }
 
-function githubRepo(plugin) {
-  const url = String(plugin?.htmlUrl || "");
-  const match = url.match(/github\.com\/([^/]+)\/([^/#?]+)/i);
-  if (match) {
-    return { owner: match[1], repo: match[2].replace(/\.git$/, "") };
-  }
-  const name = String(plugin?.name || "").split("#")[0];
-  return { owner: plugin?.owner, repo: name };
-}
-
 async function fetchText(url, signal) {
   const res = await fetch(url, { signal });
   if (!res.ok) {
@@ -129,11 +120,11 @@ export async function hydrateReadme(plugin, chinese) {
   if (plugin.readmeMarkdown || locales.zh || locales.en || locales.default) {
     return plugin;
   }
-  const { owner, repo } = githubRepo(plugin);
-  if (!owner || !repo) {
+  const repo = githubRepo(plugin);
+  if (!repo.owner || !repo.name) {
     return plugin;
   }
-  const branch = plugin.defaultBranch || "main";
+  const branch = repo.branch || plugin.defaultBranch || "main";
   const files = chinese
     ? ["README.zh-CN.md", "README.zh.md", "README.md"]
     : ["README.md", "README.en.md"];
@@ -143,9 +134,10 @@ export async function hydrateReadme(plugin, chinese) {
     const found = {};
     await Promise.all(
       files.map(async (file) => {
-        const encoded = file.split("/").map(encodeURIComponent).join("/");
-        const cdn = `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${encodeURIComponent(branch)}/${encoded}`;
-        const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch)}/${encoded}`;
+        const path = [repo.basePath, file].filter(Boolean).join("/");
+        const encoded = path.split("/").map(encodeURIComponent).join("/");
+        const cdn = `https://cdn.jsdelivr.net/gh/${repo.owner}/${repo.name}@${encodeURIComponent(branch)}/${encoded}`;
+        const raw = rawGithubUrl({ ...plugin, defaultBranch: branch }, file);
         const text = (await fetchText(cdn, controller.signal)) || (await fetchText(raw, controller.signal));
         if (text) {
           found[file] = text;

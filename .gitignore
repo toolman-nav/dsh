@@ -9,3 +9,5 @@ frontend/dist/
 *.log
 .env
 .vscode/
+.superdesign/tmp/
+.npm-cache/

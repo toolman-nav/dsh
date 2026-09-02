@@ -1,5 +1,5 @@
 <script setup>
-import { useRouter } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
 import { copyText, formatDate, formatStars, pluginHref, pluginHue, pluginInitials, pluginTitle, plainText, capabilityLabel, kindLabel, t } from "../ui.js";
 
 const props = defineProps({
@@ -21,13 +21,13 @@ async function copyCmd(event) {
 </script>
 
 <template>
-  <article class="card" role="link" tabindex="0" @click="open" @keydown.enter="open">
+  <article class="card" @click="open">
     <div class="card-body">
       <div class="card-head">
         <span class="mark" :style="{ '--h': pluginHue(plugin) }">{{ pluginInitials(plugin) }}</span>
         <div class="card-head-text">
           <div class="card-top">
-            <span class="card-title">{{ pluginTitle(plugin) }}</span>
+            <RouterLink class="card-title" :to="pluginHref(plugin)" @click.stop>{{ pluginTitle(plugin) }}</RouterLink>
             <span class="stars">★ {{ formatStars(plugin.stars) }}</span>
           </div>
           <div class="meta">

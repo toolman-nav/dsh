@@ -42,9 +42,9 @@ npm run verify:seo
 
 Cloudflare Workers Builds 设置：
 
-- Root directory：`frontend`
+- Root directory：留空（使用仓库根目录）
 - Build command：`npm run build`
-- Deploy command：`npx wrangler deploy`
+- Deploy command：`npm run deploy`
 - 不设置 `VITE_API_BASE` 时，生产包读取构建生成的 `/data/catalog-index.json` 与详情分片
 
 构建会为首页、目录、关于页和每个插件详情生成独立 HTML，并生成 `sitemap.xml`、`robots.txt`、`llms.txt`、`llms-full.txt` 与分片 JSON 数据。Wrangler 使用 `404-page` 提供真实 404；不要重新加入 `/* /index.html 200`，否则未知 URL 会成为不利于 SEO 的软 404，并可能被 Cloudflare 判定为无限循环。

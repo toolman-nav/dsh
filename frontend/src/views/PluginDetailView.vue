@@ -10,6 +10,7 @@ const route = useRoute();
 const plugin = ref(null);
 const tab = ref("readme");
 const error = ref("");
+let loadSequence = 0;
 
 const readmeHtml = computed(() => {
   void ui.lang;
@@ -39,6 +40,7 @@ async function onReadmeClick(event) {
 }
 
 async function load() {
+  const sequence = ++loadSequence;
   error.value = "";
   tab.value = "readme";
   setSeo({
@@ -48,13 +50,16 @@ async function load() {
     robots: "noindex,follow",
   });
   try {
-    plugin.value = await fetchPlugin(route.params.owner, route.params.name);
-    hydrateReadme(plugin.value, ui.lang !== "en").then((next) => {
-      if (plugin.value?.id === next?.id) {
+    const nextPlugin = await fetchPlugin(route.params.owner, route.params.name);
+    if (sequence !== loadSequence) return;
+    plugin.value = nextPlugin;
+    hydrateReadme(nextPlugin, ui.lang !== "en").then((next) => {
+      if (sequence === loadSequence && plugin.value?.id === next?.id) {
         plugin.value = next;
       }
     });
   } catch {
+    if (sequence !== loadSequence) return;
     plugin.value = null;
     error.value = t("没有找到这个插件。", "Plugin not found.");
   }

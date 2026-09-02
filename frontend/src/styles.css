@@ -641,9 +641,17 @@ code,
 .card-title {
   font-size: 15px;
   font-weight: 650;
+  color: inherit;
+  text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.card-title:focus-visible {
+  border-radius: 4px;
+  outline: 2px solid var(--harness);
+  outline-offset: 3px;
 }
 
 .stars {
