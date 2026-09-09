@@ -111,7 +111,8 @@ function applySeo(html, { title, description, keywords, path, robots = "index,fo
 
 function injectFallback(html, content) {
   const pattern = /<div id="seo-fallback">[\s\S]*?<\/div>/i;
-  const fallback = `<div id="seo-fallback">${content}</div>`;
+  const footer = `<footer class="site-footer"><nav class="footer-links wrap" aria-label="页脚导航"><a href="/about/">关于</a><a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noreferrer">DeepSeek Harness</a><a href="https://toolmanai.com/" target="_blank" rel="noopener">工具人AI · 海外AI使用指南</a></nav></footer>`;
+  const fallback = `<div id="seo-fallback">${content}${footer}</div>`;
   if (!pattern.test(html)) throw new Error("Missing #seo-fallback in built index.html");
   return html.replace(pattern, fallback);
 }

@@ -125,6 +125,7 @@ function goSearch(q) {
       <nav class="footer-links">
         <RouterLink to="/about/">{{ t("关于", "About") }}</RouterLink>
         <a href="https://github.com/deepseek-ai/deepseek-harness" target="_blank" rel="noreferrer">DeepSeek Harness</a>
+        <a href="https://toolmanai.com/" target="_blank" rel="noopener">工具人AI · 海外AI使用指南</a>
       </nav>
     </div>
   </footer>

@@ -1361,6 +1361,7 @@ code,
 
 .footer-links {
   display: flex;
+  flex-wrap: wrap;
   gap: 20px;
   font-size: 13px;
   color: var(--ink-soft);
