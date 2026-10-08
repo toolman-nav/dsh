@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { normalizePlugin } from "../src/taxonomy.js";
 import { HOME_DESCRIPTION, HOME_HEADING, HOME_KEYWORDS, HOME_TITLE, homeDescription } from "../src/seo.js";
-import { buildBrowsePages } from "./catalog-pages.mjs";
+import { INDEX_KEYS, buildBrowsePages } from "./catalog-pages.mjs";
 
 const SITE_URL = String(process.env.SITE_URL || "https://dshpluginlist.com").replace(/\/$/, "");
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -197,8 +197,7 @@ const dataDir = resolve(outDir, "data");
 mkdirSync(dataDir, { recursive: true });
 const meta = { lastCrawledAt: catalog.lastCrawledAt || "", total: plugins.length, topicTotal: allPlugins.length };
 const home = { ...meta, featured: featured.slice(0, 12), newest: byUpdated.slice(0, 12), popular: byStars.slice(0, 12) };
-const indexKeys = ["id", "owner", "name", "description", "stars", "updatedAt", "createdAt", "topics", "capability", "kind", "featured", "pluginLike", "installCommand"];
-const catalogIndex = allPlugins.map((plugin) => Object.fromEntries(indexKeys.map((key) => [key, plugin[key]])));
+const catalogIndex = allPlugins.map((plugin) => Object.fromEntries(INDEX_KEYS.map((key) => [key, plugin[key]])));
 writeFileSync(resolve(dataDir, "meta.json"), JSON.stringify(meta));
 writeFileSync(resolve(dataDir, "home.json"), JSON.stringify(home));
 writeFileSync(resolve(dataDir, "catalog-index.json"), JSON.stringify({ plugins: catalogIndex }));
@@ -241,14 +240,6 @@ for (const plugin of allPlugins) {
   const topicHtml = topics.length ? `<p><strong>主题：</strong>${topics.map(escapeHtml).join("、")}</p>` : "";
   html = injectFallback(html, `<main id="main" class="wrap detail"><article><p><a href="/plugins/">插件目录</a> / ${escapeHtml(plugin.owner)}</p><h1>${escapeHtml(plugin.id)}</h1><p>${escapeHtml(description)}</p><h2>安装</h2><pre><code>${escapeHtml(plugin.installCommand || "")}</code></pre><h2>项目信息</h2><p>Stars：${Number(plugin.stars || 0)} · 能力：${escapeHtml(plugin.capability || "未知")} · 类型：${escapeHtml(plugin.kind || "未知")} · 更新：${escapeHtml(plugin.updatedAt || "未知")}</p>${topicHtml}<p><a href="${escapeHtml(plugin.htmlUrl || "#")}" rel="noreferrer">查看 GitHub 源码</a></p></article></main>`);
   writePage(relative, html);
-
-  const id = String(plugin.id || "");
-  const slash = id.indexOf("/");
-  const owner = slash < 0 ? String(plugin.owner || "") : id.slice(0, slash);
-  const name = slash < 0 ? String(plugin.name || "") : id.slice(slash + 1);
-  const dataFile = resolve(dataDir, "plugins", encodeURIComponent(owner), `${encodeURIComponent(name)}.json`);
-  mkdirSync(dirname(dataFile), { recursive: true });
-  writeFileSync(dataFile, JSON.stringify(plugin));
 }
 
 function dateOnly(value) {

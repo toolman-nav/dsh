@@ -1,5 +1,25 @@
 export const PAGE_SIZE = 24;
 export const BROWSE_SORTS = ["updated", "stars", "new"];
+export const INDEX_KEYS = [
+  "id",
+  "owner",
+  "name",
+  "description",
+  "stars",
+  "updatedAt",
+  "createdAt",
+  "topics",
+  "capability",
+  "kind",
+  "featured",
+  "pluginLike",
+  "installCommand",
+  "htmlUrl",
+  "language",
+  "license",
+  "defaultBranch",
+  "homepage",
+];
 
 function compareIso(a, b) {
   return String(b || "").localeCompare(String(a || ""));

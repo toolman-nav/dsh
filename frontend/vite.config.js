@@ -3,24 +3,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-import { buildBrowsePages } from "./scripts/catalog-pages.mjs";
+import { INDEX_KEYS, buildBrowsePages } from "./scripts/catalog-pages.mjs";
 
 const root = dirname(fileURLToPath(import.meta.url));
-const INDEX_KEYS = [
-  "id",
-  "owner",
-  "name",
-  "description",
-  "stars",
-  "updatedAt",
-  "createdAt",
-  "topics",
-  "capability",
-  "kind",
-  "featured",
-  "pluginLike",
-  "installCommand",
-];
 
 function sliceCatalog() {
   const catalog = JSON.parse(readFileSync(resolve(root, "public/catalog.json"), "utf8"));

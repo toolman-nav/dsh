@@ -33,16 +33,28 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function countFiles(dir) {
+  let count = 0;
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const path = resolve(dir, entry.name);
+    if (entry.isDirectory()) count += countFiles(path);
+    else count += 1;
+  }
+  return count;
+}
+
+const WORKERS_FREE_ASSET_LIMIT = 20_000;
 const sample = plugins[0];
 assert(sample, "Catalog contains no plugin-like entries");
 const [owner, name] = pluginSegments(sample);
 const sampleHtmlPath = resolve(outDir, "plugins", owner, name, "index.html");
 const sampleDataPath = resolve(outDir, "data", "plugins", owner, `${name}.json`);
 assert(existsSync(sampleHtmlPath), `Missing sample HTML: ${sampleHtmlPath}`);
-assert(existsSync(sampleDataPath), `Missing sample data: ${sampleDataPath}`);
+assert(!existsSync(sampleDataPath), "Per-plugin JSON shards should not be deployed; they exceed Workers free asset limits");
+assert(sample.htmlUrl, "Catalog index is missing htmlUrl needed by detail pages");
 
 const html = readFileSync(sampleHtmlPath, "utf8");
-const sampleData = JSON.parse(readFileSync(sampleDataPath, "utf8"));
+const sampleData = sample;
 const canonical = html.match(/rel="canonical" href="([^"]+)/)?.[1];
 const schemaText = html.match(/id="seo-jsonld" type="application\/ld\+json">([^<]+)/)?.[1];
 assert(canonical, "Sample page has no canonical URL");
@@ -83,6 +95,11 @@ assert(robots.includes("User-agent: OAI-SearchBot"), "robots.txt is missing OAI-
 assert(llmsEntries === Math.min(100, plugins.length), "llms.txt entry count mismatch");
 assert(llmsFullEntries === plugins.length, "llms-full.txt entry count mismatch");
 assert(pageCount === allPlugins.length, `Plugin HTML page count mismatch: ${pageCount}`);
+const assetCount = countFiles(outDir);
+assert(
+  assetCount < WORKERS_FREE_ASSET_LIMIT,
+  `Static asset count ${assetCount} exceeds Cloudflare Workers free limit ${WORKERS_FREE_ASSET_LIMIT}`
+);
 const unsupportedCapabilities = [...new Set(allPlugins.map((plugin) => plugin.capability).filter((capability) => !CAPABILITIES.includes(capability)))];
 assert(unsupportedCapabilities.length === 0, `Unsupported capabilities: ${unsupportedCapabilities.join(", ")}`);
 assert(!existsSync(resolve(outDir, "catalog.json")), "Legacy catalog.json should not be deployed");
@@ -139,6 +156,7 @@ const result = {
   schemaType: schema["@type"],
   sitemapUrls,
   pluginHtmlPages: pageCount,
+  staticAssetCount: assetCount,
   llmsEntries,
   llmsFullEntries,
   catalogIndexBytes: statSync(resolve(outDir, "data", "catalog-index.json")).size,
